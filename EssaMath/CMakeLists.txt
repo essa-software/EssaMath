@@ -17,3 +17,5 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/maxima.a
   DEPENDS ${CORE_LISP_SOURCES})
 
 include(${PROJECT_SOURCE_DIR}/cmake/LibraryConfig.cmake)
+
+add_compile_options(-Wall -O3 -fno-stack-protector)

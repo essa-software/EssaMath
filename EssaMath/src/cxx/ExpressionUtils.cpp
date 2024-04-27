@@ -1,4 +1,5 @@
 #include "include/ExpressionUtils.hpp"
+#include "include/Parser.hpp"
 #include <cstddef>
 #include <string>
 #include <utility>

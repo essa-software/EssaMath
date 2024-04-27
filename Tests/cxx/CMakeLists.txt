@@ -10,4 +10,6 @@ find_package(EssaMath 1.0.1 CONFIG REQUIRED)
 
 add_executable(MyTest main.cpp)
 
+add_compile_options(-Wall -O3-fsanitize=address)
+
 target_link_libraries(MyTest PRIVATE essamath)

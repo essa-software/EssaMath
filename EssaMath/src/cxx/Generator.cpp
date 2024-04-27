@@ -1,4 +1,5 @@
 #include "include/Generator.hpp"
+#include <iostream>
 
 namespace Essa::Math{
    namespace lexer{

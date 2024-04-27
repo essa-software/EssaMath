@@ -1,9 +1,6 @@
 #pragma once
-#include "SymbolTable.hpp"
-#include "Parser.hpp"
 #include "Expression.hpp"
 #include <initializer_list>
-#include <optional>
 #include <vector>
 
 namespace Essa::Math{

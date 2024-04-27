@@ -30,12 +30,13 @@ namespace Essa::Math{
                              const std::string& diagnostic,
                              const std::string& src_location)
       {
+         std::string _diagnostic = diagnostic + "," + std::to_string(tk.position);
          type t;
          t.mode         = mode;
          t.token        = tk;
-         t.diagnostic   = diagnostic;
+         t.diagnostic   = _diagnostic;
          t.src_location = src_location;
-         exprtk_debug(("%s\n",diagnostic .c_str()));
+         exprtk_debug(("%s\n",_diagnostic .c_str()));
          return t;
       }
 
