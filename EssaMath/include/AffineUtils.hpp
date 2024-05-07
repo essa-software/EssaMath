@@ -16,4 +16,16 @@ expression<T> nc_degree(expression<T>& _p);
 template<typename T>
 expression<T> dotsimp(expression<T>& _f);
 
+template<typename T>
+expression<T> monomial_dimensions(int _n);
+
+template<typename T>
+expression<T> dotsimp(std::vector<expression<T>>& _p, std::vector<expression<T>>& _m);
+
+template<typename T>
+expression<T> list_nc_monomials(std::vector<expression<T>>& _p);
+
+template<typename T>
+expression<T> list_nc_monomials(expression<T>& _p);
+
 }
