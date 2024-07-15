@@ -31,3 +31,4 @@
 build/
 maxima/
 .vscode
+.DS_Store
