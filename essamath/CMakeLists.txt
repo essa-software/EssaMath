@@ -1,6 +1,6 @@
 project(EssaMath C)
 
-file(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/*.c")
+set(SOURCES essamath.c expression.c)
 file(GLOB_RECURSE HEADERS_PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
 file(GLOB_RECURSE CORE_LISP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/maxima/src/*.lisp" "${CMAKE_CURRENT_SOURCE_DIR}/maxima/src/*.asd")
 

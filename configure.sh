@@ -6,7 +6,7 @@ then
     tar -xvzf maxima-5.47.0.tar.gz
     rm maxima-5.47.0.tar.gz
     mv maxima-5.47.0 essamath/maxima
-    cat essamath/src/lisp/cxx-api.lisp >> essamath/maxima/src/init-cl.lisp
+    cat essamath/lisp/cxx-api.lisp >> essamath/maxima/src/init-cl.lisp
     cd essamath/maxima && ./configure --with-ecl
     cd ../..
 fi

@@ -1,4 +1,5 @@
-// essa_math.h
+// essamath.h
+#include "expression.h"
 #ifndef ESSAMATH_H
 #define ESSAMATH_H
 
@@ -8,6 +9,7 @@ extern "C" {
 
 void em_init_math(void);
 void em_free_math(void);
+const char* em_getlasterror(void);
 
 #ifdef __cplusplus
 }
