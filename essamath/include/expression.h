@@ -2,22 +2,23 @@
 #ifndef EXPRESSION_H
 #define EXPRESSION_H
 
+#include <stddef.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
 struct EmList;
 
-#define EM_INTEGER  1001
-#define EM_DOUBLE   1001
-#define EM_STRING   1001
-#define EM_LIST     1001
+#define EM_UNDEF    1000
+#define EM_NUMBER   1001
+#define EM_STRING   1002
+#define EM_LIST     1003
 
+#define EM_RTUND    2000
 #define EM_RTNORM   2001
 #define EM_RTERROR  2002
 
 union EmValue{
-    int emInt;
-    double emDouble;
+    double emNumber;
     char* emString;
     struct EmList* emList;
 };
@@ -28,12 +29,12 @@ struct EmList{
     struct EmList* emNext;
 };
 
+#define em_object struct EmList*
+
 int em_eval(const char* _expr);
-void em_printf(struct EmList* _value);
-int em_toint(struct EmList* _value);
-double em_todbl(struct EmList* _value);
-const char* em_tostring(struct EmList* _value);
-const char* em_tolist(struct EmList* _value);
+void em_printf(em_object _toprint);
+void em_tostring(em_object _toprint, char* _buf, size_t _size);
+void em_rellist(em_object _tofree);
 
 #ifdef __cplusplus
 }

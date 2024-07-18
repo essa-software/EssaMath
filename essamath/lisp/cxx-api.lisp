@@ -1,6 +1,5 @@
 
-(import 'cl-user::|api-eval|)
-(defun cl-user::|api-eval| (eval-string)
+(defun api-eval (eval-string)
   (in-package :maxima)
 	(unwind-protect
 	(catch 'to-lisp
@@ -27,7 +26,7 @@
 			(setq form (funcall meval-fcn (third expr)))
 			(setq form (nformat-check form))
 			(setq result (princ-to-string form))
-			(return-from cl-user::|api-eval| result)
+			(return-from api-eval result)
 	))
     in-stream-string-rep))))
 

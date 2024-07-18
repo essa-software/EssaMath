@@ -7,9 +7,13 @@
 extern "C" {
 #endif
 
-void em_init_math(void);
-void em_free_math(void);
+void em_initmath(void);
+void em_freemath(void);
 const char* em_getlasterror(void);
+const char* em_getlastinput(void);
+const char* em_getlastoutput(void);
+const char* em_getlastintermediate(void);
+em_object em_getvar(const char* _varname);
 
 #ifdef __cplusplus
 }

@@ -4,7 +4,7 @@
 #include "expression.h"
 
 TEST(BasicEssaMathTests, InitEssaMath) {
-    em_init_math();
+    em_initmath();
 
     if(em_eval("integrate(1/(x+1), x)") == EM_RTNORM){
         std::cout << "SUCCESS!\n";
@@ -12,9 +12,14 @@ TEST(BasicEssaMathTests, InitEssaMath) {
         std::cout << "FAILURE!\n";
     }
 
-    std::cout << em_getlasterror() << "\n";
+    auto var =  em_getvar("labels");
+    em_printf(var);
+    char buf[256] = {0};
+    em_tostring(var, buf, 256);
+    std::cout << "\n" << buf << "\n";
+    em_rellist(var);
 
-    em_free_math();
+    em_freemath();
     // Assert
     EXPECT_TRUE(true);
 }
