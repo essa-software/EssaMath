@@ -117,7 +117,7 @@ em_object em_parse(cl_object _list){
     for(size_t i = 0; i < _list->string.dim; i++){
         buf[i] = (char)tolower(_list->string.self[i]);
     }
-    em_object result =  em_parse_from_string(buf, 0, strlen(buf));
+    em_object result =  em_parse_from_string(buf, 0, _list->string.dim);
     
     free(buf);
     return result;
@@ -159,12 +159,13 @@ void append_to_buffer(char* buf, size_t* buf_pos, size_t buf_size, const char* s
 }
 
 void em_tostring_helper(em_object _current, char* _buf, size_t _size, size_t* _buf_pos, int _significance);
-void em_append_operator(em_object _list, char* _buf, size_t _size, size_t* _buf_pos, int _significance, int _ommitfirst, const char* _lbracket, const char* _rbracket, const char* _separator){
+void em_append_operator(em_object _list, char* _buf, size_t _size, size_t* _buf_pos, int _significance, int _operatormode, const char* _lbracket, const char* _rbracket, const char* _separator){
     append_to_buffer(_buf, _buf_pos, _size, _lbracket);
     while (_list != NULL) {
-        if (!_ommitfirst) append_to_buffer(_buf, _buf_pos, _size, _separator);
+        if (_operatormode == 0) append_to_buffer(_buf, _buf_pos, _size, _separator);
         em_tostring_helper(_list, _buf, _size, _buf_pos, _significance);
-        if (_list->emNext != NULL && _ommitfirst) append_to_buffer(_buf, _buf_pos, _size, _separator);
+        if (_list->emNext != NULL && _operatormode == 1) append_to_buffer(_buf, _buf_pos, _size, _separator);
+        if (_operatormode == 2) append_to_buffer(_buf, _buf_pos, _size, _separator);
         _list = _list->emNext;
     }
     append_to_buffer(_buf, _buf_pos, _size, _rbracket);
@@ -224,6 +225,12 @@ void em_tostring_helper(em_object _current, char* _buf, size_t _size, size_t* _b
                         }else{
                             em_append_operator(list, _buf, _size, _buf_pos, 3, 1, "", "", "^");
                         }
+                    } else if (strcmp(name->emVal.emString, "mfactorial") == 0) {
+                        if(_significance > 4){
+                            em_append_operator(list, _buf, _size, _buf_pos, 4, 2, "(", ")", "!");
+                        }else{
+                            em_append_operator(list, _buf, _size, _buf_pos, 4, 2, "", "", "!");
+                        }
                     } else if (strcmp(name->emVal.emString, "mlist") == 0) {
                        em_append_operator(list, _buf, _size, _buf_pos, 0, 1, "[", "]", ",");
                     } else {
@@ -281,4 +288,56 @@ em_object em_getexpr(em_object _identifier){
     cl_object obj = cl_eval(c_string_to_object(buf));
 
     return em_parse(obj);
+}
+
+// em_expr em_createexpressiondouble(em_object _object, const char** _varlist, double** _vardata){
+
+// }
+
+// em_complexexpr em_createexpressioncomplex(em_object _object, const char** _varlist, double** _vardata){
+
+// }
+
+double em_calculateexpr(em_expr _expr){
+    if(!_expr->EmFunc) {
+        return 0.0;
+    }
+    return (*_expr->EmFunc)(_expr->EmArgs, _expr->EmCount); 
+}
+
+_Complex double em_calculatecomplexexpr(em_complexexpr _expr){
+    if(!_expr->EmFunc) {
+        return 0.0;
+    }
+    return (*_expr->EmFunc)(_expr->EmArgs, _expr->EmCount);
+}
+
+double em_calculateexprnode(struct EmValueNode* _expr){
+    switch (_expr->emType) {
+        case EM_EXPRNUM:
+            return _expr->emVal.emNumber;
+        case EM_EXPRVAR:
+            return *_expr->emVal.emVariable;
+        case EM_EXPREXP:
+            return em_calculateexpr(_expr->emVal.emExpr);
+        default:
+        break;
+    }
+
+    return 0.0;
+}
+
+_Complex double em_calculatecomplexexprnode(struct EmComplexValueNode* _expr){
+    switch (_expr->emType) {
+        case EM_EXPRNUM:
+            return _expr->emVal.emNumber;
+        case EM_EXPRVAR:
+            return *_expr->emVal.emVariable;
+        case EM_EXPREXP:
+            return em_calculatecomplexexpr(_expr->emVal.emExpr);
+        default:
+        break;
+    }
+
+    return 0.0;
 }
