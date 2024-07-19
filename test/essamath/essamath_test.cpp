@@ -20,6 +20,7 @@ TEST(BasicEssaMathTests, InitEssaMath) {
     test("integrate(1/(x+1), x)");
     test("integrate(sin(x), x)");
     test("integrate(cos(x)^2, x)");
+    test("a^(b+(c+d)*e)");
 
     em_freemath();
     // Assert

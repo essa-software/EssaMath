@@ -57,7 +57,7 @@ const char* em_getlasterror(void){
     return "";
 }
 
-const char* em_getlast(const char* _varname){
+em_object em_getlast(const char* _varname){
     em_object object = em_getvar("labels");
     char* result = (char*)malloc(64);
     memset(result, 0, 64);
@@ -70,15 +70,21 @@ const char* em_getlast(const char* _varname){
         }
         object = object->emNext;
     }
+    em_rellist(object);
 
-    return result;
+    object = (em_object)malloc(sizeof(struct EmList));
+    object->emVal.emString = result;
+    object->emType = EM_STRING;
+    object->emNext = NULL;
+
+    return object;
 }
 
-const char* em_getlastoutput(void){
+em_object em_getlastoutput(void){
     return em_getlast("$%o");
 }
 
-const char* em_getlastintermediate(void){
+em_object em_getlastintermediate(void){
     return em_getlast("$%t");
 }
 

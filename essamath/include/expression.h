@@ -35,7 +35,7 @@ int em_eval(const char* _expr);
 void em_printf(em_object _toprint);
 void em_tostring(em_object _toprint, char* _buf, size_t _size);
 void em_rellist(em_object _tofree);
-em_object em_getexpr(const char* _identifier);
+em_object em_getexpr(em_object _identifier);
 
 #ifdef __cplusplus
 }
