@@ -117,7 +117,6 @@ em_object em_parse(cl_object _list){
     for(size_t i = 0; i < _list->string.dim; i++){
         buf[i] = (char)tolower(_list->string.self[i]);
     }
-
     em_object result =  em_parse_from_string(buf, 0, strlen(buf));
     
     free(buf);

@@ -6,10 +6,10 @@
 void test(const char* _expr){
     if(em_eval(_expr) == EM_RTNORM){
         auto expr = em_getexpr(em_getlastoutput());
-        em_printf(expr);
+        // em_printf(expr);
         char buf[256] = {0};
         em_tostring(expr, buf, 256);
-        std::cout << "\n" << buf << "\n";
+        std::cout << buf << "\n";
         em_rellist(expr);
     }
 }
@@ -17,10 +17,9 @@ void test(const char* _expr){
 TEST(BasicEssaMathTests, InitEssaMath) {
     em_initmath();
 
-    test("integrate(1/(x+1), x)");
-    test("integrate(sin(x), x)");
     test("integrate(cos(x)^2, x)");
-    test("a^(b+(c+d)*e)");
+    test("diff(cos(x)^2, x)");
+    test("laplace(cos(x)^2, x)");
 
     em_freemath();
     // Assert

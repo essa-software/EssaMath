@@ -10,11 +10,11 @@ extern "C" {
 void em_initmath(void);
 void em_freemath(void);
 
-const char* em_getlasterror(void);
 em_object em_getlastoutput(void);
 em_object em_getlastintermediate(void);
 
 em_object em_getvar(const char* _varname);
+void em_setvar(const char* _varname, em_object _value);
 
 #ifdef __cplusplus
 }

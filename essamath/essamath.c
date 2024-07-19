@@ -38,25 +38,6 @@ void em_freemath(void){
     cl_shutdown();
 }
 
-const char* em_getlasterror(void){
-    cl_object error = cl_eval(c_string_to_object("($labels)"));
-
-    printf("count: %lu\n", wcslen(error->string.self));
-
-    // if(error->base_string.dim == 0) {
-    //     return "No error.";
-    // }
-
-    // char* result = (char*)malloc(error->base_string.dim);
-    // for(size_t i = 0; i < error->base_string.dim; i++){
-    //     result[i] = (char)error->base_string.self[i];
-    // }
-
-    // return result;
-
-    return "";
-}
-
 em_object em_getlast(const char* _varname){
     em_object object = em_getvar("labels");
     char* result = (char*)malloc(64);
@@ -71,6 +52,10 @@ em_object em_getlast(const char* _varname){
         object = object->emNext;
     }
     em_rellist(object);
+
+    if(result == NULL){
+        return NULL;
+    }
 
     object = (em_object)malloc(sizeof(struct EmList));
     object->emVal.emString = result;
@@ -103,4 +88,25 @@ em_object em_getvar(const char* _varname){
     cl_object obj = cl_eval(c_string_to_object(buf));
 
     return em_parse(obj);
+}
+
+void em_setvar(const char* _varname, em_object _value){
+    size_t size = strlen(_varname);
+    for(size_t i = 0; i < size; i++){
+        if(!isalpha(_varname[i])){
+            return;
+        }
+    }
+
+    char value[2048] = {0};
+    em_tostring(_value, value, 256);
+    char processedvalue[2048] = {0};
+    if(_value->emType == EM_STRING){
+        sprintf(processedvalue, "\"%s\"", value);
+    }else{
+        sprintf(processedvalue, "%s", value);
+    }
+    char buf[2048] = {0};
+    sprintf(buf, "(setq %s %s)", _varname, processedvalue);
+    cl_eval(c_string_to_object(buf));
 }
