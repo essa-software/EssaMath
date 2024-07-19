@@ -3,7 +3,24 @@
 #include "hashmap.h"
 #include <complex.h>
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
+
+double dummy_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return em_calculateexprnode(_args[0]);
+}
+
+_Complex double dummy_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return em_calculatecomplexexprnode(_args[0]);
+}
 
 double add_double(struct EmValueNode** _args, size_t _count){
     double result = 0;
@@ -141,6 +158,38 @@ _Complex double abs_complex(struct EmComplexValueNode** _args, size_t _count){
     return cabs(em_calculatecomplexexprnode(_args[0]));
 }
 
+double sin_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return sin(em_calculateexprnode(_args[0]));
+}
+
+_Complex double sin_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return csin(em_calculatecomplexexprnode(_args[0]));
+}
+
+double cos_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return cos(em_calculateexprnode(_args[0]));
+}
+
+_Complex double cos_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return ccos(em_calculatecomplexexprnode(_args[0]));
+}
+
 static struct EmHashmap* hashmapdouble = NULL;
 static struct EmHashmap* hashmapcomplex = NULL;
 
@@ -148,6 +197,7 @@ void em_inithashmapdouble(void){
     hashmapdouble = (struct EmHashmap*)malloc(sizeof(struct EmHashmap));
     em_initializehashmap(hashmapdouble);
 
+    em_hashmapinsert(hashmapdouble, "dummy", (void*)&dummy_double);
     em_hashmapinsert(hashmapdouble, "plus", (void*)&add_double);
     em_hashmapinsert(hashmapdouble, "minus", (void*)&sub_double);
     em_hashmapinsert(hashmapdouble, "times", (void*)&mul_double);
@@ -157,12 +207,15 @@ void em_inithashmapdouble(void){
     em_hashmapinsert(hashmapdouble, "factorial", (void*)&fact_double);
     em_hashmapinsert(hashmapdouble, "abs", (void*)&abs_double);
     em_hashmapinsert(hashmapdouble, "cabs", (void*)&abs_double);
+    em_hashmapinsert(hashmapdouble, "sin", (void*)&sin_double);
+    em_hashmapinsert(hashmapdouble, "cos", (void*)&cos_double);
 }
 
 void em_inithashmapcomplex(void){
     hashmapcomplex = (struct EmHashmap*)malloc(sizeof(struct EmHashmap));
     em_initializehashmap(hashmapcomplex);
     
+    em_hashmapinsert(hashmapcomplex, "dummy", (void*)&dummy_complex);
     em_hashmapinsert(hashmapcomplex, "plus", (void*)&add_complex);
     em_hashmapinsert(hashmapcomplex, "minus", (void*)&sub_complex);
     em_hashmapinsert(hashmapcomplex, "times", (void*)&mul_complex);
@@ -171,6 +224,8 @@ void em_inithashmapcomplex(void){
     em_hashmapinsert(hashmapcomplex, "expt", (void*)&pow_complex);
     em_hashmapinsert(hashmapdouble, "abs", (void*)&abs_complex);
     em_hashmapinsert(hashmapdouble, "cabs", (void*)&abs_complex);
+    em_hashmapinsert(hashmapdouble, "sin", (void*)&sin_complex);
+    em_hashmapinsert(hashmapdouble, "cos", (void*)&cos_complex);
 }
 
 double (*em_getfunctiondouble(const char* _funcname))(struct EmValueNode**, size_t){
