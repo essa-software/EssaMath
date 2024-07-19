@@ -1,5 +1,8 @@
 #include "essamath.h"
 #include "expression.h"
+#include <ctype.h>
+#include <stddef.h>
+#include <ctype.h>
 #include <ecl/ecl.h>
 #include <ecl/external.h>
 #include <stdlib.h>
@@ -54,9 +57,41 @@ const char* em_getlasterror(void){
     return "";
 }
 
+const char* em_getlast(const char* _varname){
+    em_object object = em_getvar("labels");
+    char* result = (char*)malloc(64);
+    memset(result, 0, 64);
+
+    object = object->emVal.emList->emNext;
+    while(object){
+        if(object->emType == EM_STRING && strncmp(_varname, object->emVal.emString, strlen(_varname)) == 0){
+            strcpy(result, object->emVal.emString + 1);
+            break;
+        }
+        object = object->emNext;
+    }
+
+    return result;
+}
+
+const char* em_getlastoutput(void){
+    return em_getlast("$%o");
+}
+
+const char* em_getlastintermediate(void){
+    return em_getlast("$%t");
+}
+
 extern em_object em_parse(cl_object _list);
 
 em_object em_getvar(const char* _varname){
+    size_t size = strlen(_varname);
+    for(size_t i = 0; i < size; i++){
+        if(!isalpha(_varname[i])){
+            return NULL;
+        }
+    }
+
     char buf[2048] = {0};
     sprintf(buf, "(api-eval \"%s$\")", _varname);
     cl_object obj = cl_eval(c_string_to_object(buf));

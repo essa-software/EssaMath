@@ -11,7 +11,7 @@ int em_eval(const char* _expr){
 
 	ECL_HANDLER_CASE_BEGIN(l_env, ecl_list1(ECL_T)) {
         char buf[1024] = {0};
-        sprintf(buf, "(handler-case (catch 'macsyma-quit (continue :stream (make-string-input-stream \"%s$\") :batch-or-demo-flag :batch) ) )", _expr);
+        sprintf(buf, "(handler-case (catch 'macsyma-quit (macsyma-top-level (make-string-input-stream \"%s$\") :batch) ) )", _expr);
         cl_eval(c_string_to_object(buf));
 	} ECL_HANDLER_CASE(1, condition) {
         return EM_RTERROR;
@@ -74,8 +74,15 @@ em_object em_parse_from_string(const char* _buf, size_t _begin, size_t _end){
             }
         }
 
-        current->emNext = em_parse_from_string(_buf, begin, _end);
-        current->emNext->emNext = NULL;
+        em_object obj = em_parse_from_string(_buf, begin, _end);
+        if(!current->emVal.emList){
+            current->emVal.emList = obj;
+            current = obj;
+        }else{
+            current->emNext = obj;
+            current = obj;
+        }
+        current->emNext = NULL;
     }else{
         int isnum = 1, point = 0;
         for(size_t i = _begin; i < _end; i++){
@@ -88,6 +95,7 @@ em_object em_parse_from_string(const char* _buf, size_t _begin, size_t _end){
         }
 
         char* str = (char*)malloc(_end - _begin);
+        memset(str, 0, _end - _begin);
         strncpy(str, _buf + _begin, _end - _begin);
         if(isnum){
             result->emType = EM_NUMBER;
@@ -104,6 +112,7 @@ em_object em_parse_from_string(const char* _buf, size_t _begin, size_t _end){
 
 em_object em_parse(cl_object _list){
     char* buf = (char*)malloc(_list->string.dim);
+    memset(buf, 0, _list->string.dim);
     
     for(size_t i = 0; i < _list->string.dim; i++){
         buf[i] = (char)tolower(_list->string.self[i]);
@@ -139,91 +148,88 @@ void em_printf(em_object _toprint){
         }
     }
 }
-void em_getstring_recursive(em_object _current, char* _buf, size_t _index, size_t _size){
-    if(_index >= _size){
-        return;
-    }
 
-    em_object current = _current;
-    const char* name = NULL;
-    if(current->emType == EM_LIST){
-        if(current->emVal.emList->emType == EM_STRING){
-            name = current->emVal.emList->emVal.emString;
-        }
+void append_to_buffer(char* buf, size_t* buf_pos, size_t buf_size, const char* str) {
+    size_t len = strlen(str);
+    if (*buf_pos + len < buf_size) {
+        strcpy(&buf[*buf_pos], str);
+        *buf_pos += len;
+    } else {
+        // Handle buffer overflow error if needed
     }
-    current = current->emNext;
-    if(!name){
-        return;
-    }
-
-    if(strcmp(name, "mlist") == 0){
-        _buf[_index] = '[';
-    }else{
-        if(name[0] == '%'){
-            sprintf(_buf + _index, "%s", name + 1);
-            _index = strlen(_buf);
-        }
-        _buf[_index] = '(';
-    }
-    _index++;
-    size_t count = 0;
-
-    while(current){
-        if(count != 0){
-            if(strcmp(name, "mplus") == 0){
-                _buf[_index] = '+';
-            }else if(strcmp(name, "mminus") == 0){
-                _buf[_index] = '-';
-            }else if(strcmp(name, "mtimes") == 0){
-                _buf[_index] = '*';
-            }else if(strcmp(name, "mquotient") == 0 || strcmp(name, "mrat") == 0){
-                _buf[_index] = '/';
-            }else if(strcmp(name, "mexpt") == 0){
-                _buf[_index] = '^';
-            }else{
-                _buf[_index] = ',';
-            }
-            _index++;
-        }
-
-        switch(current->emType){
-            case EM_NUMBER:
-                sprintf(_buf + _index, "%f", current->emVal.emNumber);
-            break;
-            case EM_STRING:
-                if(current->emVal.emString[0] == '$'){
-                    sprintf(_buf + _index, "%s", current->emVal.emString + 1);
-                }else{
-                    sprintf(_buf + _index, "%s", current->emVal.emString);
-                }
-            break;
-            case EM_LIST:
-                em_getstring_recursive(_current, _buf, _index, _size);
-            break;
-            default:
-            break;
-        } 
-        current = current->emNext;
-        _index = strlen(_buf);
-
-        count++;
-    }
-
-    if(strcmp(name, "mlist") == 0){
-        _buf[_index] = ']';
-    }else{
-        _buf[_index] = ')';
-    }
-    _index++;
 }
 
-void em_tostring(em_object _toprint, char* _buf, size_t _size){
-    memset(_buf, 0, _size);
-    if(_toprint->emType == EM_LIST){
-        em_getstring_recursive(_toprint->emVal.emList, _buf, 0, _size);
-    }else{
-        em_getstring_recursive(_toprint, _buf, 0, _size);
+void em_tostring_helper(em_object _current, char* _buf, size_t _size, size_t* _buf_pos);
+void em_append_operator(em_object _list, char* _buf, size_t _size, size_t* _buf_pos, int _ommitfirst, const char* _lbracket, const char* _rbracket, const char* _separator){
+    append_to_buffer(_buf, _buf_pos, _size, _lbracket);
+    while (_list != NULL) {
+        if (!_ommitfirst) append_to_buffer(_buf, _buf_pos, _size, _separator);
+        em_tostring_helper(_list, _buf, _size, _buf_pos);
+        if (_list->emNext != NULL && _ommitfirst) append_to_buffer(_buf, _buf_pos, _size, _separator);
+        _list = _list->emNext;
     }
+    append_to_buffer(_buf, _buf_pos, _size, _rbracket);
+}
+
+void em_tostring_helper(em_object _current, char* _buf, size_t _size, size_t* _buf_pos) {
+    if (_current == NULL) return;
+
+    switch (_current->emType) {
+        case EM_NUMBER: {
+            char number_buf[32];
+            snprintf(number_buf, sizeof(number_buf), "%f", _current->emVal.emNumber);
+            append_to_buffer(_buf, _buf_pos, _size, number_buf);
+            break;
+        }
+        case EM_STRING: {
+            if (_current->emVal.emString[0] == '$') {
+                append_to_buffer(_buf, _buf_pos, _size, &_current->emVal.emString[1]);
+            } else {
+                append_to_buffer(_buf, _buf_pos, _size, _current->emVal.emString);
+            }
+            break;
+        }
+        case EM_LIST: {
+            em_object list = _current->emVal.emList;
+            if(list != NULL){
+                em_object name = list->emVal.emList;
+                if (name != NULL && name->emType == EM_STRING) {
+                    list = list->emNext;
+                    if (strcmp(name->emVal.emString, "mplus") == 0) {
+                       em_append_operator(list, _buf, _size, _buf_pos, 1, "(", ")", "+");
+                    } else if (strcmp(name->emVal.emString, "mminus") == 0) {
+                       em_append_operator(list, _buf, _size, _buf_pos, 0, "(", ")", "-");
+                    } else if (strcmp(name->emVal.emString, "mtimes") == 0) {
+                       em_append_operator(list, _buf, _size, _buf_pos, 1, "(", ")", "*");
+                    } else if (strcmp(name->emVal.emString, "mrat") == 0 || strcmp(name->emVal.emString, "mquotient") == 0) {
+                       em_append_operator(list, _buf, _size, _buf_pos, 1, "(", ")", "/");
+                    } else if (strcmp(name->emVal.emString, "mexpt") == 0) {
+                       em_append_operator(list, _buf, _size, _buf_pos, 1, "(", ")", "^");
+                    } else if (strcmp(name->emVal.emString, "mlist") == 0) {
+                       em_append_operator(list, _buf, _size, _buf_pos, 1, "[", "]", ",");
+                    } else {
+                        if (name->emVal.emString[0] == '%') {
+                            append_to_buffer(_buf, _buf_pos, _size, &name->emVal.emString[1]);
+                        } else {
+                            append_to_buffer(_buf, _buf_pos, _size, name->emVal.emString);
+                        }
+                       em_append_operator(list, _buf, _size, _buf_pos, 1, "(", ")", ",");
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    if (_current->emNext != NULL) {
+        em_tostring_helper(_current->emNext, _buf, _size, _buf_pos);
+    }
+}
+
+void em_tostring(em_object _current, char* _buf, size_t _size) {
+    size_t buf_pos = 0;
+    em_tostring_helper(_current, _buf, _size, &buf_pos);
+    _buf[buf_pos] = '\0';  // Null-terminate the string
 }
 
 void em_rellist(em_object _tofree){
@@ -242,4 +248,16 @@ void em_rellist(em_object _tofree){
         } 
         current = current->emNext;
     }
+}
+
+em_object em_getexpr(const char* _identifier){
+    if(_identifier[0] != '%' || !(_identifier[1] == 'i' || _identifier[1] == 'o' || _identifier[1] == 't')){
+        return NULL;
+    }
+
+    char buf[2048] = {0};
+    sprintf(buf, "(api-eval \"%s$\")", _identifier);
+    cl_object obj = cl_eval(c_string_to_object(buf));
+
+    return em_parse(obj);
 }
