@@ -45,7 +45,6 @@ em_object em_parse_from_string(const char* _buf, size_t _begin, size_t _end){
                 depthBrackets++;
             }else if(_buf[i] == ')'){
                 depthBrackets--;
-                i++;
             }
 
             if(_buf[i] == '\"' || _buf[i] == '\''){
@@ -118,7 +117,7 @@ em_object em_parse(cl_object _list){
         buf[i] = (char)tolower(_list->string.self[i]);
     }
 
-    em_object result =  em_parse_from_string(buf, 0, _list->string.dim);
+    em_object result =  em_parse_from_string(buf, 0, strlen(buf));
     
     free(buf);
     return result;
@@ -177,7 +176,7 @@ void em_tostring_helper(em_object _current, char* _buf, size_t _size, size_t* _b
     switch (_current->emType) {
         case EM_NUMBER: {
             char number_buf[32];
-            snprintf(number_buf, sizeof(number_buf), "%f", _current->emVal.emNumber);
+            snprintf(number_buf, sizeof(number_buf), "%g", _current->emVal.emNumber);
             append_to_buffer(_buf, _buf_pos, _size, number_buf);
             break;
         }
@@ -193,8 +192,8 @@ void em_tostring_helper(em_object _current, char* _buf, size_t _size, size_t* _b
             em_object list = _current->emVal.emList;
             if(list != NULL){
                 em_object name = list->emVal.emList;
+                list = list->emNext;
                 if (name != NULL && name->emType == EM_STRING) {
-                    list = list->emNext;
                     if (strcmp(name->emVal.emString, "mplus") == 0) {
                        em_append_operator(list, _buf, _size, _buf_pos, 1, "(", ")", "+");
                     } else if (strcmp(name->emVal.emString, "mminus") == 0) {
@@ -219,10 +218,6 @@ void em_tostring_helper(em_object _current, char* _buf, size_t _size, size_t* _b
                 break;
             }
         }
-    }
-
-    if (_current->emNext != NULL) {
-        em_tostring_helper(_current->emNext, _buf, _size, _buf_pos);
     }
 }
 
