@@ -3,7 +3,6 @@
 #include "hashmap.h"
 #include <complex.h>
 #include <math.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 double dummy_double(struct EmValueNode** _args, size_t _count){
@@ -83,43 +82,35 @@ _Complex double mul_complex(struct EmComplexValueNode** _args, size_t _count){
 }
 
 double div_double(struct EmValueNode** _args, size_t _count){
-    double result = 1;
-
-    for(size_t i = 0; i < _count; i++){
-        result /= em_calculateexprnode(_args[i]);
+    if(_count != 2){
+        return (double)NAN;
     }
 
-    return result;
+    return em_calculateexprnode(_args[0]) / em_calculateexprnode(_args[1]);
 }
 
 _Complex double div_complex(struct EmComplexValueNode** _args, size_t _count){
-    _Complex double result = 1;
-
-    for(size_t i = 0; i < _count; i++){
-        result /= em_calculatecomplexexprnode(_args[i]);
+    if(_count != 2){
+        return (double)NAN;
     }
 
-    return result;
+    return em_calculatecomplexexprnode(_args[0]) / em_calculatecomplexexprnode(_args[1]);
 }
 
 double pow_double(struct EmValueNode** _args, size_t _count){
-    double result = 1;
-
-    for(size_t i = 0; i < _count; i++){
-        result = pow(result,em_calculateexprnode(_args[i]));
+    if(_count != 2){
+        return (double)NAN;
     }
 
-    return result;
+    return pow(em_calculateexprnode(_args[0]),em_calculateexprnode(_args[1]));
 }
 
 _Complex double pow_complex(struct EmComplexValueNode** _args, size_t _count){
-    _Complex double result = 1;
-
-    for(size_t i = 0; i < _count; i++){
-        result = cpow(result,em_calculatecomplexexprnode(_args[i]));
+    if(_count != 2){
+        return (double)NAN;
     }
 
-    return result;
+    return cpow(em_calculatecomplexexprnode(_args[0]),em_calculatecomplexexprnode(_args[1]));
 }
 
 double fact_double(struct EmValueNode** _args, size_t _count){

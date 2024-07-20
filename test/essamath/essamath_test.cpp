@@ -18,7 +18,7 @@ void test(const char* _expr){
         vars[0] = &x;
         auto e = em_createexpressiondouble(expr, 1, varlist, vars);
 
-        // std::cout << em_calculateexpr(e) << "\n";
+        std::cout << em_calculateexpr(e) << "\n";
         em_rellist(expr);
     }
 }

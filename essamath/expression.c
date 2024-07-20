@@ -333,9 +333,11 @@ struct EmValueNode* em_createexpressiondouble_helper(em_object _current, size_t 
         }
         case EM_LIST: {
             result->emType = EM_EXPREXP;
-            result->emVal.emExpr = em_createexpressiondouble(_current->emVal.emList, _varcount, _varlist, _vardata);
+            result->emVal.emExpr = em_createexpressiondouble(_current, _varcount, _varlist, _vardata);
             break;
         }
+        default:
+        break;
     }
 
     return result;
@@ -349,10 +351,10 @@ em_expr em_createexpressiondouble(em_object _current, size_t _varcount, const ch
     switch (_current->emType) {
         case EM_NUMBER: {
         case EM_STRING:
-            result->EmArgs = (struct EmValueNode**)malloc(sizeof(struct EmValueNode*));
-            result->EmArgs[0] = em_createexpressiondouble_helper(_current, _varcount, _varlist, _vardata);
             result->EmCount = 1;
             result->EmFunc = em_getfunctiondouble("dummy");
+            result->EmArgs = (struct EmValueNode**)malloc(sizeof(struct EmValueNode*));
+            result->EmArgs[0] = em_createexpressiondouble_helper(_current, _varcount, _varlist, _vardata);
             break;
         }
         case EM_LIST: {
@@ -369,17 +371,19 @@ em_expr em_createexpressiondouble(em_object _current, size_t _varcount, const ch
                     current = current->emNext;
                 }
                 if (name != NULL && name->emType == EM_STRING) {
+                    result->EmCount = count;
                     result->EmArgs = (struct EmValueNode**)malloc(count * sizeof(struct EmValueNode*));
+                    result->EmFunc = em_getfunctiondouble(&name->emVal.emString[1]);
                     for(size_t i = 0; i < count; i++){
-                        result->EmArgs[i] = em_createexpressiondouble_helper(_current, _varcount, _varlist, _vardata);
+                        result->EmArgs[i] = em_createexpressiondouble_helper(list, _varcount, _varlist, _vardata);
                         list = list->emNext;
                     }
-                    result->EmFunc = em_getfunctiondouble(name->emVal.emString + 1);
-                    result->EmCount = count;
                 }
                 break;
             }
         }
+        default:
+        break;
     }
 
     return result;
