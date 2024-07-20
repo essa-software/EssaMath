@@ -164,7 +164,10 @@ void em_tostring_helper(em_object _current, char* _buf, size_t _size, size_t* _b
 void em_append_operator(em_object _list, char* _buf, size_t _size, size_t* _buf_pos, int _significance, int _operatormode, const char* _lbracket, const char* _rbracket, const char* _separator){
     append_to_buffer(_buf, _buf_pos, _size, _lbracket);
     while (_list != NULL) {
-        if (_operatormode == 0) { append_to_buffer(_buf, _buf_pos, _size, _separator);}
+        if (_operatormode == 0) { 
+            if(*_buf_pos > 0 && _buf[*_buf_pos - 1] == '+'){ (*_buf_pos)--;}
+            append_to_buffer(_buf, _buf_pos, _size, _separator);
+        }
         em_tostring_helper(_list, _buf, _size, _buf_pos, _significance);
         if (_list->emNext != NULL && _operatormode == 1) { append_to_buffer(_buf, _buf_pos, _size, _separator);}
         if (_operatormode == 2) { append_to_buffer(_buf, _buf_pos, _size, _separator);}
@@ -174,8 +177,7 @@ void em_append_operator(em_object _list, char* _buf, size_t _size, size_t* _buf_
 }
 
 void em_tostring_helper(em_object _current, char* _buf, size_t _size, size_t* _buf_pos, int _significance) {
-    if (_current == NULL) { return;
-}
+    if (_current == NULL) { return; }
 
     switch (_current->emType) {
         case EM_NUMBER: {
@@ -305,31 +307,42 @@ struct EmValueNode* em_createexpressiondouble_helper(em_object _current, size_t 
         case EM_NUMBER: {
             result->emType = EM_EXPRNUM;
             result->emVal.emNumber = _current->emVal.emNumber;
+            // printf("Number: %g\n", _current->emVal.emNumber);
             break;
         }
         case EM_STRING: {
             if (_current->emVal.emString[0] == '$') {
-                result->emType = EM_EXPRVAR;
-                for(size_t i = 0; i < _varcount; i++){
-                    if(strcmp(&_current->emVal.emString[1], _varlist[i]) == 0){
-                        result->emVal.emVariable = _vardata[i];
+                if(_current->emVal.emString[1] == '%'){
+                    // printf("Constant: %s\n", _current->emVal.emString);
+                    if(strcmp(_current->emVal.emString, "$%pi") == 0){
+                        result->emType = EM_EXPRNUM;
+                        result->emVal.emNumber = M_PI;
+                    }else if(strcmp(_current->emVal.emString, "$%e") == 0){
+                        result->emType = EM_EXPRNUM;
+                        result->emVal.emNumber = M_E;
+                    }else if(strcmp(_current->emVal.emString, "$%i") == 0){
+                        result->emType = EM_EXPRNUM;
+                        result->emVal.emNumber = (double)I;
+                    }else if(strcmp(_current->emVal.emString, "$%inf") == 0){
+                        result->emType = EM_EXPRNUM;
+                        result->emVal.emNumber = (double)INFINITY;
+                    }else if(strcmp(_current->emVal.emString, "$%minf") == 0){
+                        result->emType = EM_EXPRNUM;
+                        result->emVal.emNumber = -(double)INFINITY;
+                    }else if(strcmp(_current->emVal.emString, "$%phi") == 0){
+                        result->emType = EM_EXPRNUM;
+                        result->emVal.emNumber = (1.0+sqrt(5))/2.0;
+                    }else{
+                        result->emType = EM_EXPREXP;
                     }
-                }
-                
-            } else if (_current->emVal.emString[0] == '%') {
-                result->emType = EM_EXPRNUM;
-                if(strcmp(_current->emVal.emString, "%pi") == 0){
-                    result->emVal.emNumber = M_PI;
-                }else if(strcmp(_current->emVal.emString, "%e") == 0){
-                    result->emVal.emNumber = M_E;
-                }else if(strcmp(_current->emVal.emString, "%i") == 0){
-                    result->emVal.emNumber = (double)I;
-                }else if(strcmp(_current->emVal.emString, "%inf") == 0){
-                    result->emVal.emNumber = (double)INFINITY;
-                }else if(strcmp(_current->emVal.emString, "%minf") == 0){
-                    result->emVal.emNumber = -(double)INFINITY;
-                }else if(strcmp(_current->emVal.emString, "%phi") == 0){
-                    result->emVal.emNumber = (1.0+sqrt(5))/2.0;
+                }else{
+                    result->emType = EM_EXPRVAR;
+                    for(size_t i = 0; i < _varcount; i++){
+                        if(strcmp(&_current->emVal.emString[1], _varlist[i]) == 0){
+                            result->emVal.emVariable = _vardata[i];
+                            // printf("Variable: %s\t%zx\n", &_current->emVal.emString[1], (size_t)_vardata[i]);
+                        }
+                    }
                 }
             }
             break;
@@ -374,6 +387,7 @@ em_expr em_createexpression(em_object _current, size_t _varcount, const char** _
                     current = current->emNext;
                 }
                 if (name != NULL && name->emType == EM_STRING) {
+                    // printf("Name: %s\n", name->emVal.emString);
                     result->EmCount = count;
                     result->EmArgs = (struct EmValueNode**)malloc(count * sizeof(struct EmValueNode*));
                     result->EmFunc = em_getfunctionptr(&name->emVal.emString[1]);
@@ -406,27 +420,37 @@ struct EmComplexValueNode* em_createcomplexexpression_helper(em_object _current,
         }
         case EM_STRING: {
             if (_current->emVal.emString[0] == '$') {
-                result->emType = EM_EXPRVAR;
-                for(size_t i = 0; i < _varcount; i++){
-                    if(strcmp(&_current->emVal.emString[1], _varlist[i]) == 0){
-                        result->emVal.emVariable = _vardata[i];
+                if(_current->emVal.emString[1] == '%'){
+                    // printf("Constant: %s\n", _current->emVal.emString);
+                    if(strcmp(_current->emVal.emString, "$%pi") == 0){
+                        result->emType = EM_EXPRNUM;
+                        result->emVal.emNumber = M_PI;
+                    }else if(strcmp(_current->emVal.emString, "$%e") == 0){
+                        result->emType = EM_EXPRNUM;
+                        result->emVal.emNumber = M_E;
+                    }else if(strcmp(_current->emVal.emString, "$%i") == 0){
+                        result->emType = EM_EXPRNUM;
+                        result->emVal.emNumber = (double)I;
+                    }else if(strcmp(_current->emVal.emString, "$%inf") == 0){
+                        result->emType = EM_EXPRNUM;
+                        result->emVal.emNumber = (double)INFINITY;
+                    }else if(strcmp(_current->emVal.emString, "$%minf") == 0){
+                        result->emType = EM_EXPRNUM;
+                        result->emVal.emNumber = -(double)INFINITY;
+                    }else if(strcmp(_current->emVal.emString, "$%phi") == 0){
+                        result->emType = EM_EXPRNUM;
+                        result->emVal.emNumber = (1.0+sqrt(5))/2.0;
+                    }else{
+                        result->emType = EM_EXPREXP;
                     }
-                }
-                
-            } else if (_current->emVal.emString[0] == '%') {
-                result->emType = EM_EXPRNUM;
-                if(strcmp(_current->emVal.emString, "%pi") == 0){
-                    result->emVal.emNumber = M_PI;
-                }else if(strcmp(_current->emVal.emString, "%e") == 0){
-                    result->emVal.emNumber = M_E;
-                }else if(strcmp(_current->emVal.emString, "%i") == 0){
-                    result->emVal.emNumber = (double)I;
-                }else if(strcmp(_current->emVal.emString, "%inf") == 0){
-                    result->emVal.emNumber = (double)INFINITY;
-                }else if(strcmp(_current->emVal.emString, "%minf") == 0){
-                    result->emVal.emNumber = -(double)INFINITY;
-                }else if(strcmp(_current->emVal.emString, "%phi") == 0){
-                    result->emVal.emNumber = (1.0+sqrt(5))/2.0;
+                }else{
+                    result->emType = EM_EXPRVAR;
+                    for(size_t i = 0; i < _varcount; i++){
+                        if(strcmp(&_current->emVal.emString[1], _varlist[i]) == 0){
+                            result->emVal.emVariable = _vardata[i];
+                            // printf("Variable: %s\t%zx\n", &_current->emVal.emString[1], (size_t)_vardata[i]);
+                        }
+                    }
                 }
             }
             break;
