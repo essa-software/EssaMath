@@ -150,6 +150,70 @@ _Complex double abs_complex(struct EmComplexValueNode** _args, size_t _count){
     return cabs(em_calculatecomplexexprnode(_args[0]));
 }
 
+double exp_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return exp(em_calculateexprnode(_args[0]));
+}
+
+_Complex double exp_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return cexp(em_calculatecomplexexprnode(_args[0]));
+}
+
+double log_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return log(em_calculateexprnode(_args[0]));
+}
+
+_Complex double log_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return clog(em_calculatecomplexexprnode(_args[0]));
+}
+
+double erf_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return erf(em_calculateexprnode(_args[0]));
+}
+
+double floor_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return floor(em_calculateexprnode(_args[0]));
+}
+
+double ceil_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return ceil(em_calculateexprnode(_args[0]));
+}
+
+double round_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return round(em_calculateexprnode(_args[0]));
+}
+
 double sin_double(struct EmValueNode** _args, size_t _count){
     if(_count != 1){
         return (double)NAN;
@@ -182,6 +246,374 @@ _Complex double cos_complex(struct EmComplexValueNode** _args, size_t _count){
     return ccos(em_calculatecomplexexprnode(_args[0]));
 }
 
+double tan_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return tan(em_calculateexprnode(_args[0]));
+}
+
+_Complex double tan_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return ctan(em_calculatecomplexexprnode(_args[0]));
+}
+
+double cot_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return 1.0/tan(em_calculateexprnode(_args[0]));
+}
+
+_Complex double cot_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return 1.0/ctan(em_calculatecomplexexprnode(_args[0]));
+}
+
+double sec_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return 1.0/cos(em_calculateexprnode(_args[0]));
+}
+
+_Complex double sec_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return 1.0/ccos(em_calculatecomplexexprnode(_args[0]));
+}
+
+double csc_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return 1.0/sin(em_calculateexprnode(_args[0]));
+}
+
+_Complex double csc_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return 1.0/csin(em_calculatecomplexexprnode(_args[0]));
+}
+
+double asin_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return asin(em_calculateexprnode(_args[0]));
+}
+
+_Complex double asin_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return casin(em_calculatecomplexexprnode(_args[0]));
+}
+
+double acos_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return acos(em_calculateexprnode(_args[0]));
+}
+
+_Complex double acos_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return cacos(em_calculatecomplexexprnode(_args[0]));
+}
+
+double atan_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return atan(em_calculateexprnode(_args[0]));
+}
+
+_Complex double atan_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return catan(em_calculatecomplexexprnode(_args[0]));
+}
+
+double atan2_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 2){
+        return (double)NAN;
+    }
+
+    return atan2(em_calculateexprnode(_args[0]), em_calculateexprnode(_args[1]));
+}
+
+_Complex double atan2_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return catan(em_calculatecomplexexprnode(_args[0]) / em_calculatecomplexexprnode(_args[1]));
+}
+
+double acot_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return 1.0/atan(em_calculateexprnode(_args[0]));
+}
+
+_Complex double acot_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return 1.0/catan(em_calculatecomplexexprnode(_args[0]));
+}
+
+double asec_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return 1.0/acos(em_calculateexprnode(_args[0]));
+}
+
+_Complex double asec_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return 1.0/cacos(em_calculatecomplexexprnode(_args[0]));
+}
+
+double acsc_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return 1.0/asin(em_calculateexprnode(_args[0]));
+}
+
+_Complex double acsc_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return 1.0/casin(em_calculatecomplexexprnode(_args[0]));
+}
+
+double sinh_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return sinh(em_calculateexprnode(_args[0]));
+}
+
+_Complex double sinh_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return csinh(em_calculatecomplexexprnode(_args[0]));
+}
+
+double cosh_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return cosh(em_calculateexprnode(_args[0]));
+}
+
+_Complex double cosh_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return ccosh(em_calculatecomplexexprnode(_args[0]));
+}
+
+double tanh_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return tanh(em_calculateexprnode(_args[0]));
+}
+
+_Complex double tanh_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return ctanh(em_calculatecomplexexprnode(_args[0]));
+}
+
+double coth_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return 1.0/tanh(em_calculateexprnode(_args[0]));
+}
+
+_Complex double coth_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return 1.0/ctanh(em_calculatecomplexexprnode(_args[0]));
+}
+
+double sech_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return 1.0/cosh(em_calculateexprnode(_args[0]));
+}
+
+_Complex double sech_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return 1.0/ccosh(em_calculatecomplexexprnode(_args[0]));
+}
+
+double csch_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return 1.0/sinh(em_calculateexprnode(_args[0]));
+}
+
+_Complex double csch_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return 1.0/csinh(em_calculatecomplexexprnode(_args[0]));
+}
+
+double asinh_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return asinh(em_calculateexprnode(_args[0]));
+}
+
+_Complex double asinh_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return casinh(em_calculatecomplexexprnode(_args[0]));
+}
+
+double acosh_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return acosh(em_calculateexprnode(_args[0]));
+}
+
+_Complex double acosh_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return cacosh(em_calculatecomplexexprnode(_args[0]));
+}
+
+double atanh_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return atanh(em_calculateexprnode(_args[0]));
+}
+
+_Complex double atanh_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return catanh(em_calculatecomplexexprnode(_args[0]));
+}
+
+double acoth_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return 1.0/atanh(em_calculateexprnode(_args[0]));
+}
+
+_Complex double acoth_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return 1.0/catanh(em_calculatecomplexexprnode(_args[0]));
+}
+
+double asech_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return 1.0/acosh(em_calculateexprnode(_args[0]));
+}
+
+_Complex double asech_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return 1.0/cacosh(em_calculatecomplexexprnode(_args[0]));
+}
+
+double acsch_double(struct EmValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return 1.0/asinh(em_calculateexprnode(_args[0]));
+}
+
+_Complex double acsch_complex(struct EmComplexValueNode** _args, size_t _count){
+    if(_count != 1){
+        return (double)NAN;
+    }
+
+    return 1.0/casinh(em_calculatecomplexexprnode(_args[0]));
+}
+
 static struct EmHashmap* hashmapdouble = NULL;
 static struct EmHashmap* hashmapcomplex = NULL;
 
@@ -197,10 +629,44 @@ void em_inithashmapdouble(void){
     em_hashmapinsert(hashmapdouble, "quotient", (void*)&div_double);
     em_hashmapinsert(hashmapdouble, "expt", (void*)&pow_double);
     em_hashmapinsert(hashmapdouble, "factorial", (void*)&fact_double);
+
     em_hashmapinsert(hashmapdouble, "abs", (void*)&abs_double);
-    em_hashmapinsert(hashmapdouble, "cabs", (void*)&abs_double);
+    em_hashmapinsert(hashmapdouble, "exp", (void*)&exp_double);
+    em_hashmapinsert(hashmapdouble, "log", (void*)&log_double);
+    em_hashmapinsert(hashmapdouble, "erf", (void*)&erf_double);
+
+    em_hashmapinsert(hashmapdouble, "floor", (void*)&floor_double);
+    em_hashmapinsert(hashmapdouble, "ceil", (void*)&ceil_double);
+    em_hashmapinsert(hashmapdouble, "round", (void*)&round_double);
+
     em_hashmapinsert(hashmapdouble, "sin", (void*)&sin_double);
     em_hashmapinsert(hashmapdouble, "cos", (void*)&cos_double);
+    em_hashmapinsert(hashmapdouble, "tan", (void*)&tan_double);
+    em_hashmapinsert(hashmapdouble, "cot", (void*)&cot_double);
+    em_hashmapinsert(hashmapdouble, "sec", (void*)&sec_double);
+    em_hashmapinsert(hashmapdouble, "csc", (void*)&csc_double);
+
+    em_hashmapinsert(hashmapdouble, "asin", (void*)&asin_double);
+    em_hashmapinsert(hashmapdouble, "acos", (void*)&acos_double);
+    em_hashmapinsert(hashmapdouble, "atan", (void*)&atan_double);
+    em_hashmapinsert(hashmapdouble, "atan2", (void*)&atan2_double);
+    em_hashmapinsert(hashmapdouble, "acot", (void*)&acot_double);
+    em_hashmapinsert(hashmapdouble, "asec", (void*)&asec_double);
+    em_hashmapinsert(hashmapdouble, "acsc", (void*)&acsc_double);
+
+    em_hashmapinsert(hashmapdouble, "sinh", (void*)&sinh_double);
+    em_hashmapinsert(hashmapdouble, "cosh", (void*)&cosh_double);
+    em_hashmapinsert(hashmapdouble, "tanh", (void*)&tanh_double);
+    em_hashmapinsert(hashmapdouble, "coth", (void*)&coth_double);
+    em_hashmapinsert(hashmapdouble, "sech", (void*)&sech_double);
+    em_hashmapinsert(hashmapdouble, "csch", (void*)&csch_double);
+
+    em_hashmapinsert(hashmapdouble, "asinh", (void*)&asinh_double);
+    em_hashmapinsert(hashmapdouble, "acosh", (void*)&acosh_double);
+    em_hashmapinsert(hashmapdouble, "atanh", (void*)&atanh_double);
+    em_hashmapinsert(hashmapdouble, "acoth", (void*)&acoth_double);
+    em_hashmapinsert(hashmapdouble, "asech", (void*)&asech_double);
+    em_hashmapinsert(hashmapdouble, "acsch", (void*)&acsch_double);
 }
 
 void em_inithashmapcomplex(void){
@@ -214,19 +680,48 @@ void em_inithashmapcomplex(void){
     em_hashmapinsert(hashmapcomplex, "rat", (void*)&div_complex);
     em_hashmapinsert(hashmapcomplex, "quotient", (void*)&div_complex);
     em_hashmapinsert(hashmapcomplex, "expt", (void*)&pow_complex);
+
     em_hashmapinsert(hashmapcomplex, "abs", (void*)&abs_complex);
-    em_hashmapinsert(hashmapcomplex, "cabs", (void*)&abs_complex);
+    em_hashmapinsert(hashmapcomplex, "exp", (void*)&exp_complex);
+    em_hashmapinsert(hashmapcomplex, "log", (void*)&log_complex);
+
     em_hashmapinsert(hashmapcomplex, "sin", (void*)&sin_complex);
     em_hashmapinsert(hashmapcomplex, "cos", (void*)&cos_complex);
+    em_hashmapinsert(hashmapcomplex, "tan", (void*)&tan_complex);
+    em_hashmapinsert(hashmapcomplex, "cot", (void*)&cot_complex);
+    em_hashmapinsert(hashmapcomplex, "sec", (void*)&sec_complex);
+    em_hashmapinsert(hashmapcomplex, "csc", (void*)&csc_complex);
+
+    em_hashmapinsert(hashmapcomplex, "asin", (void*)&asin_complex);
+    em_hashmapinsert(hashmapcomplex, "acos", (void*)&acos_complex);
+    em_hashmapinsert(hashmapcomplex, "atan", (void*)&atan_complex);
+    em_hashmapinsert(hashmapcomplex, "atan2", (void*)&atan2_complex);
+    em_hashmapinsert(hashmapcomplex, "acot", (void*)&acot_complex);
+    em_hashmapinsert(hashmapcomplex, "asec", (void*)&asec_complex);
+    em_hashmapinsert(hashmapcomplex, "acsc", (void*)&acsc_complex);
+
+    em_hashmapinsert(hashmapcomplex, "sinh", (void*)&sinh_complex);
+    em_hashmapinsert(hashmapcomplex, "cosh", (void*)&cosh_complex);
+    em_hashmapinsert(hashmapcomplex, "tanh", (void*)&tanh_complex);
+    em_hashmapinsert(hashmapcomplex, "coth", (void*)&coth_complex);
+    em_hashmapinsert(hashmapcomplex, "sech", (void*)&sech_complex);
+    em_hashmapinsert(hashmapcomplex, "csch", (void*)&csch_complex);
+
+    em_hashmapinsert(hashmapcomplex, "asinh", (void*)&asinh_complex);
+    em_hashmapinsert(hashmapcomplex, "acosh", (void*)&acosh_complex);
+    em_hashmapinsert(hashmapcomplex, "atanh", (void*)&atanh_complex);
+    em_hashmapinsert(hashmapcomplex, "acoth", (void*)&acoth_complex);
+    em_hashmapinsert(hashmapcomplex, "asech", (void*)&asech_complex);
+    em_hashmapinsert(hashmapcomplex, "acsch", (void*)&acsch_complex);
 }
 
-double (*em_getfunctiondouble(const char* _funcname))(struct EmValueNode**, size_t){
+double (*em_getfunctionptr(const char* _funcname))(struct EmValueNode**, size_t){
     void* result = em_hashmapsearch(hashmapdouble, _funcname);
 
     return (double (*)(struct EmValueNode**, size_t))result;
 }
 
-_Complex double (*em_getfunctioncomplex(const char* _funcname))(struct EmComplexValueNode**, size_t){
+_Complex double (*em_getcomplexfunctionptr(const char* _funcname))(struct EmComplexValueNode**, size_t){
     void* result = em_hashmapsearch(hashmapcomplex, _funcname);
 
     return (_Complex double (*)(struct EmComplexValueNode**, size_t))result;

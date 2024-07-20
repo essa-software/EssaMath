@@ -10,8 +10,8 @@ extern "C" {
 void em_inithashmapdouble(void);
 void em_inithashmapcomplex(void);
 
-double (*em_getfunctiondouble(const char* _funcname))(struct EmValueNode**, size_t);
-_Complex double (*em_getfunctioncomplex(const char* _funcname))(struct EmComplexValueNode**, size_t);
+double (*em_getfunctionptr(const char* _funcname))(struct EmValueNode**, size_t);
+_Complex double (*em_getcomplexfunctionptr(const char* _funcname))(struct EmComplexValueNode**, size_t);
 
 void em_freehashmapdouble(void);
 void em_freehashmapcomplex(void);

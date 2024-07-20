@@ -59,8 +59,8 @@ struct EmExpression{
     double (*EmFunc)(struct EmValueNode**, size_t);
 };
 union EmExprComplexValue{
-    double emNumber;
-    double* emVariable;
+    _Complex double emNumber;
+    _Complex double* emVariable;
     struct EmComplexExpression* emExpr;
 };
 
@@ -78,8 +78,8 @@ struct EmComplexExpression{
 #define em_expr struct EmExpression*
 #define em_complexexpr struct EmComplexExpression*
 
-em_expr em_createexpressiondouble(em_object _object, size_t _varcount, const char** _varlist, double** _vardata);
-em_complexexpr em_createexpressioncomplex(em_object _object, size_t _varcount, const char** _varlist, double** _vardata);
+em_expr em_createexpression(em_object _object, size_t _varcount, const char** _varlist, double** _vardata);
+em_complexexpr em_createcomplexexpression(em_object _object, size_t _varcount, const char** _varlist, _Complex double** _vardata);
 
 double em_calculateexpr(em_expr _expr);
 _Complex double em_calculatecomplexexpr(em_complexexpr _expr);
