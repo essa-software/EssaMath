@@ -2,7 +2,6 @@
 #include "expression.h"
 #include <ctype.h>
 #include <stddef.h>
-#include <ctype.h>
 #include <ecl/ecl.h>
 #include <ecl/external.h>
 #include <stdlib.h>

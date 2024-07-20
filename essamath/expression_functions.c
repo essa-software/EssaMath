@@ -3,6 +3,7 @@
 #include "hashmap.h"
 #include <complex.h>
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 double dummy_double(struct EmValueNode** _args, size_t _count){
@@ -213,10 +214,10 @@ void em_inithashmapcomplex(void){
     em_hashmapinsert(hashmapcomplex, "rat", (void*)&div_complex);
     em_hashmapinsert(hashmapcomplex, "quotient", (void*)&div_complex);
     em_hashmapinsert(hashmapcomplex, "expt", (void*)&pow_complex);
-    em_hashmapinsert(hashmapdouble, "abs", (void*)&abs_complex);
-    em_hashmapinsert(hashmapdouble, "cabs", (void*)&abs_complex);
-    em_hashmapinsert(hashmapdouble, "sin", (void*)&sin_complex);
-    em_hashmapinsert(hashmapdouble, "cos", (void*)&cos_complex);
+    em_hashmapinsert(hashmapcomplex, "abs", (void*)&abs_complex);
+    em_hashmapinsert(hashmapcomplex, "cabs", (void*)&abs_complex);
+    em_hashmapinsert(hashmapcomplex, "sin", (void*)&sin_complex);
+    em_hashmapinsert(hashmapcomplex, "cos", (void*)&cos_complex);
 }
 
 double (*em_getfunctiondouble(const char* _funcname))(struct EmValueNode**, size_t){

@@ -87,6 +87,11 @@ _Complex double em_calculatecomplexexpr(em_complexexpr _expr);
 double em_calculateexprnode(struct EmValueNode* _expr);
 _Complex double em_calculatecomplexexprnode(struct EmComplexValueNode* _expr);
 
+void em_relexpr(em_expr _tofree);
+void em_relcomplexexpr(em_complexexpr _tofree);
+void em_relexprnode(struct EmValueNode* _tofree);
+void em_relcomplexexprnode(struct EmComplexValueNode* _tofree);
+
 #define EM_NEAREQUAL(_lhs, _rhs, _eps) \
 (fabs((_lhs) - (_rhs)) <= (_eps))
 

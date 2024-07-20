@@ -25,7 +25,8 @@ jobs:
     - name: Install dependencies from package manager
       run: |
         sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-        sudo apt install gcc-12 g++-12 ninja-build
+        sudo apt install gcc-12 g++-12 ninja-build python3
+        pip install conan
         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 100 --slave /usr/bin/g++ g++ /usr/bin/g++-12 --slave /usr/bin/gcov gcov /usr/bin/gcov-12
 
     - name: Install ECL
@@ -41,18 +42,17 @@ jobs:
 
     - name: Configure CMake
       run: |
-        mkdir build
         cd build
         cmake -GNinja ..
-        sudo ninja install
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=build/Release/generators/conan_toolchain.cmake -GNinja ..
 
     - name: Build
       # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      run: sudo ninja install
 
     - name: Test
       working-directory: ${{github.workspace}}/build
       # Execute tests defined by the CMake configuration.
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ctest -C ${{env.BUILD_TYPE}}
+      run: ctest
 

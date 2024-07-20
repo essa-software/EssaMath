@@ -164,17 +164,18 @@ void em_tostring_helper(em_object _current, char* _buf, size_t _size, size_t* _b
 void em_append_operator(em_object _list, char* _buf, size_t _size, size_t* _buf_pos, int _significance, int _operatormode, const char* _lbracket, const char* _rbracket, const char* _separator){
     append_to_buffer(_buf, _buf_pos, _size, _lbracket);
     while (_list != NULL) {
-        if (_operatormode == 0) append_to_buffer(_buf, _buf_pos, _size, _separator);
+        if (_operatormode == 0) { append_to_buffer(_buf, _buf_pos, _size, _separator);}
         em_tostring_helper(_list, _buf, _size, _buf_pos, _significance);
-        if (_list->emNext != NULL && _operatormode == 1) append_to_buffer(_buf, _buf_pos, _size, _separator);
-        if (_operatormode == 2) append_to_buffer(_buf, _buf_pos, _size, _separator);
+        if (_list->emNext != NULL && _operatormode == 1) { append_to_buffer(_buf, _buf_pos, _size, _separator);}
+        if (_operatormode == 2) { append_to_buffer(_buf, _buf_pos, _size, _separator);}
         _list = _list->emNext;
     }
     append_to_buffer(_buf, _buf_pos, _size, _rbracket);
 }
 
 void em_tostring_helper(em_object _current, char* _buf, size_t _size, size_t* _buf_pos, int _significance) {
-    if (_current == NULL) return;
+    if (_current == NULL) { return;
+}
 
     switch (_current->emType) {
         case EM_NUMBER: {
@@ -247,6 +248,8 @@ void em_tostring_helper(em_object _current, char* _buf, size_t _size, size_t* _b
                 break;
             }
         }
+        default:
+        break;
     }
 }
 
@@ -294,7 +297,7 @@ em_object em_getexpr(em_object _identifier){
 
 
 struct EmValueNode* em_createexpressiondouble_helper(em_object _current, size_t _varcount, const char** _varlist, double** _vardata) {
-    if (_current == NULL) return NULL;
+    if (_current == NULL) { return NULL;}
 
     struct EmValueNode* result = (struct EmValueNode*)malloc(sizeof(struct EmValueNode));
 
@@ -344,7 +347,7 @@ struct EmValueNode* em_createexpressiondouble_helper(em_object _current, size_t 
 }
 
 em_expr em_createexpressiondouble(em_object _current, size_t _varcount, const char** _varlist, double** _vardata){
-    if (_current == NULL) return NULL;
+    if (_current == NULL) { return NULL;}
 
     em_expr result = (em_expr)malloc(sizeof(struct EmExpression));
 
@@ -435,4 +438,38 @@ _Complex double em_calculatecomplexexprnode(struct EmComplexValueNode* _expr){
     }
 
     return 0.0;
+}
+
+void em_relexpr(em_expr _tofree){
+    for(size_t i = 0; i < _tofree->EmCount; i++){
+        em_relexprnode(_tofree->EmArgs[i]);
+    }
+    free(_tofree->EmArgs);
+}
+
+void em_relcomplexexpr(em_complexexpr _tofree){
+    for(size_t i = 0; i < _tofree->EmCount; i++){
+        em_relcomplexexprnode(_tofree->EmArgs[i]);
+    }
+    free(_tofree->EmArgs);
+}
+
+void em_relexprnode(struct EmValueNode* _tofree){
+    switch (_tofree->emType) {
+        case EM_EXPREXP:
+            em_relexpr(_tofree->emVal.emExpr);
+            break;
+        default:
+        break;
+    }
+}
+
+void em_relcomplexexprnode(struct EmComplexValueNode* _tofree){
+    switch (_tofree->emType) {
+        case EM_EXPREXP:
+            em_relcomplexexpr(_tofree->emVal.emExpr);
+            break;
+        default:
+        break;
+    }
 }
