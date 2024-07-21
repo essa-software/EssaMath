@@ -116,10 +116,16 @@ em_object em_parse(cl_object _list){
     char* buf = (char*)malloc(_list->string.dim);
     memset(buf, 0, _list->string.dim);
     
+    size_t index = 0;
     for(size_t i = 0; i < _list->string.dim; i++){
-        buf[i] = (char)tolower(_list->string.self[i]);
+        char c = (char)tolower(_list->string.self[i]);
+        if(c != '\n'){
+            buf[index] = c;
+            index++;
+        }
     }
-    em_object result =  em_parse_from_string(buf, 0, _list->string.dim);
+    // printf("%s\n", buf);
+    em_object result =  em_parse_from_string(buf, 0, index);
     
     free(buf);
     return result;
@@ -387,10 +393,14 @@ em_expr em_createexpression(em_object _current, size_t _varcount, const char** _
                     current = current->emNext;
                 }
                 if (name != NULL && name->emType == EM_STRING) {
-                    // printf("Name: %s\n", name->emVal.emString);
                     result->EmCount = count;
                     result->EmArgs = (struct EmValueNode**)malloc(count * sizeof(struct EmValueNode*));
-                    result->EmFunc = em_getfunctionptr(&name->emVal.emString[1]);
+                    if(name->emVal.emString[0] == 'm' || name->emVal.emString[0] == '%'){
+                        result->EmFunc = em_getfunctionptr(&name->emVal.emString[1]);
+                    }else{
+                        result->EmFunc = em_getfunctionptr(name->emVal.emString);
+                    }
+                    // printf("Name: %s\t%zx\n", name->emVal.emString, (size_t)result->EmFunc);
                     for(size_t i = 0; i < count; i++){
                         result->EmArgs[i] = em_createexpressiondouble_helper(list, _varcount, _varlist, _vardata);
                         list = list->emNext;
@@ -430,7 +440,7 @@ struct EmComplexValueNode* em_createcomplexexpression_helper(em_object _current,
                         result->emVal.emNumber = M_E;
                     }else if(strcmp(_current->emVal.emString, "$%i") == 0){
                         result->emType = EM_EXPRNUM;
-                        result->emVal.emNumber = (double)I;
+                        result->emVal.emNumber = (__extension__ 1.0i);
                     }else if(strcmp(_current->emVal.emString, "$%inf") == 0){
                         result->emType = EM_EXPRNUM;
                         result->emVal.emNumber = (double)INFINITY;
@@ -497,7 +507,11 @@ em_complexexpr em_createcomplexexpression(em_object _current, size_t _varcount, 
                 if (name != NULL && name->emType == EM_STRING) {
                     result->EmCount = count;
                     result->EmArgs = (struct EmComplexValueNode**)malloc(count * sizeof(struct EmComplexValueNode*));
-                    result->EmFunc = em_getcomplexfunctionptr(&name->emVal.emString[1]);
+                    if(name->emVal.emString[0] == 'm' || name->emVal.emString[0] == '%'){
+                        result->EmFunc = em_getcomplexfunctionptr(&name->emVal.emString[1]);
+                    }else{
+                        result->EmFunc = em_getcomplexfunctionptr(name->emVal.emString);
+                    }
                     for(size_t i = 0; i < count; i++){
                         result->EmArgs[i] = em_createcomplexexpression_helper(list, _varcount, _varlist, _vardata);
                         list = list->emNext;

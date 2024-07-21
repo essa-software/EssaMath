@@ -21,11 +21,11 @@ void traverse_expr(std::vector<TestOptionsReal> const& _arr, size_t _index, std:
 bool test_real(std::string const& _exprstring, std::function<double(std::vector<double> const&)> const& _exprtest, std::vector<TestOptionsReal> const& _options, bool _verbose){
     if(em_eval(_exprstring.c_str()) == EM_RTNORM){
         auto expr = em_getexpr(em_getlastoutput());
-        // em_printf(expr);
         char buf[256] = {0};
         em_tostring(expr, buf, 256);
         if(_verbose){
-            std::cout << buf << "\n";
+            em_printf(expr);
+            std::cout << "\n" << buf << "\n";
         }
 
         std::vector<const char*> varlist;
@@ -64,8 +64,8 @@ bool test_real(std::string const& _exprstring, std::function<double(std::vector<
             result &= EM_NEAREQUAL(lhs, rhs, 1e-3);
         });
 
-        em_relexpr(e);
-        em_rellist(expr);
+        // em_relexpr(e);
+        // em_rellist(expr);
 
         return result;
     }
@@ -87,7 +87,6 @@ void traverse_complex_expr(std::vector<TestOptionsComplex> const& _arr, size_t _
 bool test_complex(std::string const& _exprstring, std::function<std::complex<double>(std::vector<std::complex<double>> const&)> const& _exprtest, std::vector<TestOptionsComplex> const& _options, bool _verbose){
     if(em_eval(_exprstring.c_str()) == EM_RTNORM){
         auto expr = em_getexpr(em_getlastoutput());
-        // em_printf(expr);
         char buf[256] = {0};
         em_tostring(expr, buf, 256);
         if(_verbose){
@@ -131,8 +130,8 @@ bool test_complex(std::string const& _exprstring, std::function<std::complex<dou
             result &= EM_NEAREQUAL(lhs.real(), rhs.real(), 1e-3) && EM_NEAREQUAL(lhs.imag(), rhs.imag(), 1e-3);
         });
 
-        em_relcomplexexpr(e);
-        em_rellist(expr);
+        // em_relcomplexexpr(e);
+        // em_rellist(expr);
 
         return result;
     }

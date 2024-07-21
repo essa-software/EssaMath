@@ -43,23 +43,19 @@ _Complex double add_complex(struct EmComplexValueNode** _args, size_t _count){
 }
 
 double sub_double(struct EmValueNode** _args, size_t _count){
-    double result = 0;
-
-    for(size_t i = 0; i < _count; i++){
-        result -= em_calculateexprnode(_args[i]);
+    if(_count != 1){
+        return (double)NAN;
     }
 
-    return result;
+    return -em_calculateexprnode(_args[0]);
 }
 
 _Complex double sub_complex(struct EmComplexValueNode** _args, size_t _count){
-    _Complex double result = 0;
-
-    for(size_t i = 0; i < _count; i++){
-        result -= em_calculatecomplexexprnode(_args[i]);
+    if(_count != 1){
+        return (double)NAN;
     }
 
-    return result;
+    return -em_calculatecomplexexprnode(_args[0]);
 }
 
 double mul_double(struct EmValueNode** _args, size_t _count){
