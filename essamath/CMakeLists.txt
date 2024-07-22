@@ -4,12 +4,14 @@ set(SOURCES
   essamath.c 
   expression.c 
   expression_functions.c 
+  expression_domain.c 
+  math_utils.c 
   hashmap.c)
 file(GLOB_RECURSE HEADERS_PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
 file(GLOB_RECURSE CORE_LISP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/maxima/src/*.lisp" "${CMAKE_CURRENT_SOURCE_DIR}/maxima/src/*.asd")
 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/maxima.a
-  COMMAND ${ECL_BIN_PATH} --norc
+  COMMAND ${ECL_BIN_PATH} --norc --nodebug --no-trap-fpe
   --eval '(require :asdf)'
   --eval '(push \"${CMAKE_CURRENT_SOURCE_DIR}/maxima/src/\" asdf:*central-registry*)'
   --eval '(asdf:make-build :maxima :type :static-library :move-here \"${CMAKE_CURRENT_BINARY_DIR}\" :init-name \"init_lib_MAXIMA\")'

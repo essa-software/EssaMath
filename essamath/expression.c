@@ -1,4 +1,5 @@
 #include "expression.h"
+#include "math_utils.h"
 #include <complex.h>
 #include "expression_functions.h"
 #include <ctype.h>
@@ -88,6 +89,10 @@ em_object em_parse_from_string(const char* _buf, size_t _begin, size_t _end){
     }else{
         int isnum = 1, point = 0;
         for(size_t i = _begin; i < _end; i++){
+            if(i == _begin && _buf[i] == '-'){
+                continue;
+            }
+
             if(!point && _buf[i] == '.'){
                 point = 1;
             }else if(!isdigit(_buf[i])){
@@ -96,9 +101,9 @@ em_object em_parse_from_string(const char* _buf, size_t _begin, size_t _end){
             }
         }
 
-        char* str = (char*)malloc(_end - _begin);
-        memset(str, 0, _end - _begin);
+        char* str = (char*)malloc(_end - _begin + 1);
         strncpy(str, _buf + _begin, _end - _begin);
+        str[_end - _begin] = 0;
         if(isnum){
             result->emType = EM_NUMBER;
             result->emVal.emNumber = atof(str);
@@ -114,20 +119,30 @@ em_object em_parse_from_string(const char* _buf, size_t _begin, size_t _end){
 
 em_object em_parse(cl_object _list){
     char* buf = (char*)malloc(_list->string.dim);
-    memset(buf, 0, _list->string.dim);
+    char* test = (char*)malloc(_list->string.dim);
     
     size_t index = 0;
+    int ommitwhitespace = 0;
     for(size_t i = 0; i < _list->string.dim; i++){
         char c = (char)tolower(_list->string.self[i]);
-        if(c != '\n'){
+        test[i] = c;
+        
+        if(isgraph(c)){
+            ommitwhitespace = 0;
             buf[index] = c;
+            index++;
+        }else if(!ommitwhitespace){
+            ommitwhitespace = 1;
+            buf[index] = ' ';
             index++;
         }
     }
-    // printf("%s\n", buf);
+    // printf("%s\n", test);
+    buf[index] = 0;
     em_object result =  em_parse_from_string(buf, 0, index);
     
     free(buf);
+    free(test);
     return result;
 }
 
@@ -188,7 +203,11 @@ void em_tostring_helper(em_object _current, char* _buf, size_t _size, size_t* _b
     switch (_current->emType) {
         case EM_NUMBER: {
             char number_buf[32];
-            snprintf(number_buf, sizeof(number_buf), "%g", _current->emVal.emNumber);
+            if(_current->emVal.emNumber < 0) {
+                snprintf(number_buf, sizeof(number_buf), "(%g)", _current->emVal.emNumber);
+            } else {
+                snprintf(number_buf, sizeof(number_buf), "%g", _current->emVal.emNumber);
+            }
             append_to_buffer(_buf, _buf_pos, _size, number_buf);
             break;
         }
@@ -529,7 +548,7 @@ em_complexexpr em_createcomplexexpression(em_object _current, size_t _varcount, 
 
 double em_calculateexpr(em_expr _expr){
     if(!_expr->EmFunc) {
-        return (double)NAN;
+        return em_nan();
     }
     return (*_expr->EmFunc)(_expr->EmArgs, _expr->EmCount); 
 }

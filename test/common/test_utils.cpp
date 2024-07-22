@@ -1,6 +1,7 @@
 #include "test_utils.hpp"
 #include "essamath.h"
 #include "expression.h"
+#include "math_utils.h"
 #include <complex>
 #include <functional>
 #include <iostream>
@@ -61,7 +62,9 @@ bool test_real(std::string const& _exprstring, std::function<double(std::vector<
                 std::cout << "\n";
             }
 
-            result &= EM_NEAREQUAL(lhs, rhs, 1e-3);
+            if(!std::isnan(lhs) || !std::isnan(rhs)) {
+                result &= EM_NEAREQUAL(lhs, rhs, 1e-3);
+            }
         });
 
         // em_relexpr(e);
@@ -127,7 +130,9 @@ bool test_complex(std::string const& _exprstring, std::function<std::complex<dou
                 std::cout << "\n";
             }
 
-            result &= EM_NEAREQUAL(lhs.real(), rhs.real(), 1e-3) && EM_NEAREQUAL(lhs.imag(), rhs.imag(), 1e-3);
+            if(!std::isnan(lhs.real()) || !std::isnan(rhs.real())) {
+                result &= EM_NEAREQUAL(lhs.real(), rhs.real(), 1e-3) && EM_NEAREQUAL(lhs.imag(), rhs.imag(), 1e-3);
+            }
         });
 
         // em_relcomplexexpr(e);

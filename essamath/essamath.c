@@ -8,6 +8,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "expression_functions.h"
+#include "expression_domain.h"
 
 void init_lib_MAXIMA(cl_object);
 
@@ -22,9 +23,18 @@ void em_initmath(void){
     char* argv[1];
     *argv = (char*)malloc((size_t)count);
     strncpy(*argv, buf, (size_t)count);
+
+    ecl_set_option(ECL_OPT_TRAP_SIGSEGV, FALSE);
+    ecl_set_option(ECL_OPT_TRAP_SIGFPE, FALSE);
+    ecl_set_option(ECL_OPT_TRAP_SIGINT, FALSE);
+    ecl_set_option(ECL_OPT_TRAP_SIGILL, FALSE);
+    ecl_set_option(ECL_OPT_TRAP_SIGBUS, FALSE);
+    ecl_set_option(ECL_OPT_TRAP_SIGPIPE, FALSE);
+
     cl_boot(argc, argv);
     
     ecl_init_module(NULL, init_lib_MAXIMA);
+
 
     cl_eval(c_string_to_object("(initialize-runtime-globals)"));
     cl_eval(c_string_to_object("(setf *debugger-hook* nil)"));
@@ -34,12 +44,16 @@ void em_initmath(void){
     cl_eval(c_string_to_object("(setf $errormsg 0)"));
 
     em_inithashmapdouble();
+    em_inithashmapdouble_domain();
     em_inithashmapcomplex();
+    em_inithashmapcomplex_domain();
 }
 
 void em_freemath(void){
     em_freehashmapdouble();
+    em_freehashmapdouble_domain();
     em_freehashmapcomplex();
+    em_freehashmapcomplex_domain();
     
     cl_shutdown();
 }
@@ -104,9 +118,9 @@ void em_setvar(const char* _varname, em_object _value){
         }
     }
 
-    char value[2048] = {0};
+    char value[256] = {0};
     em_tostring(_value, value, 256);
-    char processedvalue[2048] = {0};
+    char processedvalue[1024] = {0};
     if(_value->emType == EM_STRING){
         sprintf(processedvalue, "\"%s\"", value);
     }else{

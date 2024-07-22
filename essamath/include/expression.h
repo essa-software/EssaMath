@@ -57,6 +57,7 @@ struct EmExpression{
     struct EmValueNode** EmArgs;
     size_t EmCount;
     double (*EmFunc)(struct EmValueNode**, size_t);
+    _Complex int (*EmDomain)(struct EmValueNode**, size_t);
 };
 union EmExprComplexValue{
     _Complex double emNumber;
@@ -73,6 +74,7 @@ struct EmComplexExpression{
     struct EmComplexValueNode** EmArgs;
     size_t EmCount;
     _Complex double (*EmFunc)(struct EmComplexValueNode**, size_t);
+    _Complex int (*EmDomain)(struct EmComplexValueNode**, size_t);
 };
 
 #define em_expr struct EmExpression*
