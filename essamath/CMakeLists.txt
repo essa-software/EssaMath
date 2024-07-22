@@ -6,6 +6,7 @@ set(SOURCES
   expression_functions.c 
   expression_domain.c 
   math_utils.c 
+  polylogarithm.c 
   hashmap.c)
 file(GLOB_RECURSE HEADERS_PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
 file(GLOB_RECURSE CORE_LISP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/maxima/src/*.lisp" "${CMAKE_CURRENT_SOURCE_DIR}/maxima/src/*.asd")
