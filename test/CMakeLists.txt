@@ -29,4 +29,5 @@ endfunction()
 
 # Add tests
 create_test(arithmetic)
+create_test(05_data_types_and_structures)
 

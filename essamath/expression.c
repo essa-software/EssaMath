@@ -24,6 +24,34 @@ int em_eval(const char* _expr){
     return EM_RTNORM;
 }
 
+int em_invoke(const char* _funcname, size_t n, ...){
+    va_list ptr;
+    size_t size = 256 * n;
+    char* command = (char*)malloc(size);
+    memset(command, 0, size);
+    strcpy(command, _funcname);
+
+    size_t index = strlen(command);
+    command[index++] = '(';
+ 
+    va_start(ptr, n);
+    for (size_t i = 0; i < n; i++){
+        em_object obj = va_arg(ptr, em_object);
+        em_tostring(obj, command + index, size - index);
+        index = strlen(command);
+        command[index++] = ',';
+    }
+    command[index - 1] = ')';
+ 
+    // Ending argument list traversal
+    va_end(ptr);
+
+    int result =  em_eval(command);
+    free(command);
+
+    return result;
+}
+
 em_object em_parse_from_string(const char* _buf, size_t _begin, size_t _end){
     for(; _begin < _end; _begin++){
         if(!isspace(_buf[_begin])) {

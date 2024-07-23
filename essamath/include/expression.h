@@ -32,6 +32,7 @@ struct EmList{
 #define em_object struct EmList*
 
 int em_eval(const char* _expr);
+int em_invoke(const char* _funcname, size_t n, ...);
 void em_printf(em_object _toprint);
 void em_tostring(em_object _toprint, char* _buf, size_t _size);
 void em_rellist(em_object _tofree);
