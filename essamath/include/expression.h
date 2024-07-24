@@ -38,6 +38,9 @@ void em_tostring(em_object _toprint, char* _buf, size_t _size);
 void em_rellist(em_object _tofree);
 em_object em_getexpr(em_object _identifier);
 
+em_object em_create_string(const char* _str);
+em_object em_create_number(double _number);
+
 #define EM_EXPRUND    3000
 #define EM_EXPRNUM    3001
 #define EM_EXPRVAR    3002

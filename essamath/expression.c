@@ -651,3 +651,25 @@ void em_relcomplexexprnode(struct EmComplexValueNode* _tofree){
         break;
     }
 }
+
+em_object em_create_string(const char* _str){
+    em_object result = (em_object)malloc(sizeof(struct EmList));
+    result->emType = EM_STRING;
+    result->emNext = NULL;
+    size_t len = strlen(result->emVal.emString);
+    if(len > 0){
+        result->emVal.emString = (char*)malloc(len);
+        strcpy(result->emVal.emString, _str);
+    }
+
+    return result;
+}
+
+em_object em_create_number(double _number){
+    em_object result = (em_object)malloc(sizeof(struct EmList));
+    result->emType = EM_NUMBER;
+    result->emNext = NULL;
+    result->emVal.emNumber = _number;
+
+    return result;
+}
