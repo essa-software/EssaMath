@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 // 19.2 Functions and Variables for integration
-int em_antid(em_object _expr, em_object _f, em_object _y, em_object _x);
+int em_antid_2(em_object _expr, em_object _f, em_object _y, em_object _x);
 int em_dblint(em_object _f, em_object _r, em_object _s, em_object _a, em_object _b);
 int em_defint(em_object _expr, em_object _x, em_object _a, em_object _b);
 int em_ilt(em_object _expr, em_object _s, em_object _t);

@@ -18,6 +18,10 @@ set(SOURCES
   14_polynomials.c
   15_special_functions.c
   16_elliptic_functions.c
+  17_limits.c
+  18_differentiation.c
+  19_integration.c
+  20_equations.c
 )
 file(GLOB_RECURSE HEADERS_PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
 file(GLOB_RECURSE CORE_LISP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/maxima/src/*.lisp" "${CMAKE_CURRENT_SOURCE_DIR}/maxima/src/*.asd")
