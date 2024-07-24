@@ -12,7 +12,7 @@
 #undef CMPLX
 #define CMPLX(x, y) ((double complex)((double)(x) + I * (double)(y)))
 
-double _Complex em_clog1p(double _Complex z)
+double _Complex em_numeric_clog1p(double _Complex z)
 {
    const double _Complex u = 1.0 + z;
    const double rz = creal(u);
@@ -29,7 +29,7 @@ double _Complex em_clog1p(double _Complex z)
    return clog(u)*(z/(u - 1.0));
 }
 
-double em_li2(double x)
+double em_numeric_li2(double x)
 {
    const double PI = 3.1415926535897932;
    const double P[] = {
@@ -99,7 +99,7 @@ double em_li2(double x)
    return r + s*y*p/q;
 }
 
-double _Complex em_cli2(double _Complex z)
+double _Complex em_numeric_cli2(double _Complex z)
 {
    const double PI = 3.1415926535897932;
 
@@ -124,10 +124,10 @@ double _Complex em_cli2(double _Complex z)
    /* special cases */
    if (iz == 0.0) {
       if (rz <= 1.0) {
-         return CMPLX(em_li2(rz), iz);
+         return CMPLX(em_numeric_li2(rz), iz);
       }
       // rz > 1.0
-      return CMPLX(em_li2(rz), -PI*log(rz));
+      return CMPLX(em_numeric_li2(rz), -PI*log(rz));
    }
 
    const double nz = rz*rz + iz*iz;
@@ -143,22 +143,22 @@ double _Complex em_cli2(double _Complex z)
    if (rz <= 0.5) {
       if (nz > 1.0) {
          const double _Complex lz = clog(-z);
-         u = -em_clog1p(-1.0/z);
+         u = -em_numeric_clog1p(-1.0/z);
          rest = -0.5*lz*lz - PI*PI/6;
          sgn = -1;
       } else { /* nz <= 1 */
-         u = -em_clog1p(-z);
+         u = -em_numeric_clog1p(-z);
          rest = 0;
          sgn = 1;
       }
    } else { /* rz > 0.5 */
       if (nz <= 2*rz) {
          u = -clog(z);
-         rest = u*em_clog1p(-z) + PI*PI/6;
+         rest = u*em_numeric_clog1p(-z) + PI*PI/6;
          sgn = -1;
       } else { /* nz > 2*rz */
          const double _Complex lz = clog(-z);
-         u = -em_clog1p(-1.0/z);
+         u = -em_numeric_clog1p(-1.0/z);
          rest = -0.5*lz*lz - PI*PI/6;
          sgn = -1;
       }
@@ -229,7 +229,7 @@ static double li3_pos(double x)
    return x*p/q;
 }
 
-double em_li3(double x)
+double em_numeric_li3(double x)
 {
    const double zeta2 = 1.6449340668482264;
    const double zeta3 = 1.2020569031595943;
@@ -278,7 +278,7 @@ double _Complex pos_clog(double _Complex z)
    return clog(z);
 }
 
-double _Complex em_cli3(double _Complex z)
+double _Complex em_numeric_cli3(double _Complex z)
 {
    const double PI    = 3.1415926535897932;
    const double zeta2 = 1.6449340668482264;
@@ -300,10 +300,10 @@ double _Complex em_cli3(double _Complex z)
 
    if (iz == 0) {
       if (rz <= 1) {
-         return CMPLX(em_li3(rz), iz);
+         return CMPLX(em_numeric_li3(rz), iz);
       } else {
          const double l = log(rz);
-         return CMPLX(em_li3(rz), -0.5*PI*l*l);
+         return CMPLX(em_numeric_li3(rz), -0.5*PI*l*l);
       }
    }
 
@@ -452,7 +452,7 @@ static double li4_one(double x)
       l2*(1.0/604800 - 1.0/91445760*l2))))));
 }
 
-double em_li4(double x)
+double em_numeric_li4(double x)
 {
    const double zeta2 = 1.6449340668482264;
    const double zeta4 = 1.0823232337111382;
@@ -496,7 +496,7 @@ double em_li4(double x)
    return rest + sgn*app;
 }
 
-double _Complex em_cli4(double _Complex z)
+double _Complex em_numeric_cli4(double _Complex z)
 {
    const double PI    = 3.1415926535897932;
    const double PI2   = PI*PI;
@@ -519,10 +519,10 @@ double _Complex em_cli4(double _Complex z)
 
    if (iz == 0) {
       if (rz <= 1) {
-         return CMPLX(em_li4(rz), iz);
+         return CMPLX(em_numeric_li4(rz), iz);
       } else {
          const double l = log(rz);
-         return CMPLX(em_li4(rz), -1.0/6*PI*l*l*l);
+         return CMPLX(em_numeric_li4(rz), -1.0/6*PI*l*l*l);
       }
    }
 
@@ -535,7 +535,7 @@ double _Complex em_cli4(double _Complex z)
       const double _Complex u2 = u*u;
       const double _Complex u4 = u2*u2;
       const double _Complex u8 = u4*u4;
-      const double c1 = 1.2020569031595943; // em_zeta(3)
+      const double c1 = 1.2020569031595943; // em_numeric_zeta(3)
       const double c2 = 0.82246703342411322;
       const double _Complex c3 = (11.0/6.0 - pos_clog(-u))/6.0;
       const double c4 = -1.0/48.0;
@@ -617,26 +617,26 @@ double _Complex Li_unity_pos(int64_t n, double _Complex z)
 {
     const double _Complex lnz = clog(z);
     const double _Complex lnz2 = lnz*lnz;
-    double _Complex sum = em_zeta(n), p = 1.0;
+    double _Complex sum = em_numeric_zeta(n), p = 1.0;
 
     for (int64_t j = 1; j < n - 1; ++j) {
         p *= lnz/(double)(j);
-        sum += em_zeta(n - j)*p;
+        sum += em_numeric_zeta(n - j)*p;
     }
 
     p *= lnz/(double)(n - 1);
-    sum += (em_harmonic(n - 1) - clog(-lnz))*p;
+    sum += (em_numeric_harmonic(n - 1) - clog(-lnz))*p;
 
     p *= lnz/(double)(n);
-    sum += em_zeta(0)*p;
+    sum += em_numeric_zeta(0)*p;
 
     p *= lnz/(double)(n + 1);
-    sum += em_zeta(-1)*p;
+    sum += em_numeric_zeta(-1)*p;
 
     for (int64_t j = (n + 3); j < LONG_MAX - 2; j += 2) {
         p *= lnz2/(double)((j - 1)*j);
         const double _Complex old_sum = sum;
-        sum += em_zeta(n - j)*p;
+        sum += em_numeric_zeta(n - j)*p;
         if (sum == old_sum) { break; }
     }
 
@@ -671,17 +671,17 @@ double _Complex Li_unity_neg(int64_t n, double _Complex z)
     double _Complex lnzk, sum_old, term;
     int64_t k;
 
-    if (em_iseven(n)) {
+    if (em_numeric_iseven(n)) {
         lnzk = lnz;
         k = 1;
     } else {
         lnzk = lnz2;
-        sum += em_zeta(n);
+        sum += em_numeric_zeta(n);
         k = 2;
     }
 
     do {
-        term = em_zeta(n - k)/em_factorial((double)k)*lnzk;
+        term = em_numeric_zeta(n - k)/em_numeric_factorial((double)k)*lnzk;
         if (!is_finite(term)) { break; }
         sum_old = sum;
         sum += term;
@@ -692,45 +692,45 @@ double _Complex Li_unity_neg(int64_t n, double _Complex z)
     return sum;
 }
 
-/// returns remainder from inversion formula
+/// returns rem_numericainder from inversion formula
 double _Complex Li_rest(int64_t n, double _Complex z)
 {
     double _Complex lnz = clog(-z);
     double _Complex lnz2 = lnz*lnz;
-    const int64_t kmax = em_iseven(n) ? n/2 : (n - 1)/2;
-    double _Complex p = em_iseven(n) ? 1.0 : lnz;
+    const int64_t kmax = em_numeric_iseven(n) ? n/2 : (n - 1)/2;
+    double _Complex p = em_numeric_iseven(n) ? 1.0 : lnz;
     double _Complex sum = 0, old_sum;
 
     for (int64_t k = kmax; k != 0; --k) {
-        const double ifac = 1/em_factorial((double)n - 2*(double)k);
+        const double ifac = 1/em_numeric_factorial((double)n - 2*(double)k);
         if (ifac == 0) { return 2.0*sum; }
-        sum += em_neg_eta(2*k)*ifac*p;
+        sum += em_numeric_neg_eta(2*k)*ifac*p;
         p *= lnz2;
         if (sum == old_sum) { break; }
     }
 
-    return 2.0*sum - p/em_factorial((double)n);
+    return 2.0*sum - p/em_numeric_factorial((double)n);
 }
 
 double norm(double _Complex z){
     return creal(z) * creal(z) + cimag(z) * cimag(z);
 }
 
-double _Complex em_li(int64_t n, double _Complex z)
+double _Complex em_numeric_li(int64_t n, double _Complex z)
 {
    if (isnan(creal(z)) || isnan(cimag(z))) {
-      return em_nan();
+      return em_numeric_nan();
    } else if (isinf(creal(z)) || isinf(cimag(z))) {
-      return -em_inf();
+      return -em_numeric_inf();
    } else if (z == 0.0) {
       return z;
    } else if (z == 1.0) {
       if (n <= 0) {
-         return em_inf() + em_inf() * I;
+         return em_numeric_inf() + em_numeric_inf() * I;
       }
-      return em_zeta(n) + cimag(z) * I;
+      return em_numeric_zeta(n) + cimag(z) * I;
    } else if (z == -1.0) {
-      return em_neg_eta(n) + cimag(z) * I;
+      return em_numeric_neg_eta(n) + cimag(z) * I;
    } else if (n < -1) {
       // arXiv:2010.09860
       const double nz = norm(z);
@@ -741,7 +741,7 @@ double _Complex em_li(int64_t n, double _Complex z)
          return Li_unity_neg(n, z);
       }
       const double _Complex sqrtz = csqrt(z);
-      return exp2((double)n - 1)*(em_li(n, sqrtz) + em_li(n, -sqrtz));
+      return exp2((double)n - 1)*(em_numeric_li(n, sqrtz) + em_numeric_li(n, -sqrtz));
    } else if (n == -1) {
       return z/((1.0 - z)*(1.0 - z));
    } else if (n == 0) {
@@ -749,15 +749,15 @@ double _Complex em_li(int64_t n, double _Complex z)
    } else if (n == 1) {
       return -clog(1.0 - z);
    } else if (n == 2) {
-      return em_li2((double)z);
+      return em_numeric_li2((double)z);
    } else if (n == 3) {
-      return em_li3((double)z);
+      return em_numeric_li3((double)z);
    } else if (n == 4) {
-      return em_li4((double)z);
+      return em_numeric_li4((double)z);
    } else if (norm(z) <= 0.75*0.75) {
       return Li_series(n, z);
    } else if (norm(z) >= 1.4*1.4) {
-      const double sgn = em_iseven(n) ? -1.0 : 1.0;
+      const double sgn = em_numeric_iseven(n) ? -1.0 : 1.0;
       return sgn*Li_series(n, 1.0/z) + Li_rest(n, z);
    }
    return Li_unity_pos(n, z);

@@ -7,18 +7,18 @@ extern "C" {
 #include <stdint.h>
 
 /** returns clog(1 + z) with double precision */
-double _Complex em_clog1p(double _Complex z);
+double _Complex em_numeric_clog1p(double _Complex z);
 
-double em_li2(double);
-double _Complex em_cli2(double _Complex);
+double em_numeric_li2(double);
+double _Complex em_numeric_cli2(double _Complex);
 
-double em_li3(double);
-double _Complex em_cli3(double _Complex);
+double em_numeric_li3(double);
+double _Complex em_numeric_cli3(double _Complex);
 
-double em_li4(double);
-double _Complex em_cli4(double _Complex);
+double em_numeric_li4(double);
+double _Complex em_numeric_cli4(double _Complex);
 
-double _Complex em_li(int64_t n, double _Complex);
+double _Complex em_numeric_li(int64_t n, double _Complex);
 
 #ifdef __cplusplus
 }

@@ -124,12 +124,12 @@ TEST(EssaMathTestsArithmetic, ExponentationAndFactorial) {
                 auto _x = _vars[0];
                 auto _y = _vars[1];
                 if(_x == 0){
-                    return em_nan();
+                    return em_numeric_nan();
                 }
 
                 std::complex<double> test = std::pow(std::complex<double>(_x*M_PI-_y*M_E/_x, 0), _x/M_PI);
                 if(test.imag() != 0){
-                    return em_nan();
+                    return em_numeric_nan();
                 }
 
                 return std::pow(_x,M_E)*_y+std::pow(_x*M_PI-_y*M_E/_x, _x/M_PI);
@@ -147,7 +147,7 @@ TEST(EssaMathTestsArithmetic, ExponentationAndFactorial) {
                     auto _b = _vars[1];
                     auto _c = _vars[2];
 
-                    return (em_factorial(_a)+em_factorial(_b))/(em_factorial(_c));
+                    return (em_numeric_factorial(_a)+em_numeric_factorial(_b))/(em_numeric_factorial(_c));
                 }, 
         std::vector<TestOptionsReal>{
         TestOptionsReal{._varname = "a", ._lbound = 1.0, ._rbound = 7.0, ._step = 2.0},
@@ -163,7 +163,7 @@ TEST(EssaMathTestsArithmetic, ExponentationAndFactorial) {
                 auto _d = _vars[0];
                 auto _e = _vars[1];
                 if(_e == 0.0){
-                    return em_nan();
+                    return em_numeric_nan();
                 }
                 
                 return std::pow(_d+_e*_i-1./(2.*_d*_e),2.*_d*_i-M_E*_e) + M_PI*_i/std::pow(_e,_d);

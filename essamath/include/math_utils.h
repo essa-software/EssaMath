@@ -7,21 +7,21 @@
 extern "C" {
 #endif
 
-double em_nan();
-_Complex double em_cnan();
+double em_numeric_nan();
+_Complex double em_numeric_cnan();
 
-double em_inf();
-_Complex double em_cinf();
+double em_numeric_inf();
+_Complex double em_numeric_cinf();
 
-int em_iseven(int64_t n);
+int em_numeric_iseven(int64_t n);
 
-double em_factorial(double _value);
+double em_numeric_factorial(double _value);
 
-int em_isinteger(double _value);
+int em_numeric_isinteger(double _value);
 
-double em_zeta(int64_t);
-double em_harmonic(int64_t);
-double em_neg_eta(int64_t);
+double em_numeric_zeta(int64_t);
+double em_numeric_harmonic(int64_t);
+double em_numeric_neg_eta(int64_t);
 
 #ifdef __cplusplus
 }

@@ -576,7 +576,7 @@ em_complexexpr em_createcomplexexpression(em_object _current, size_t _varcount, 
 
 double em_calculateexpr(em_expr _expr){
     if(!_expr->EmFunc) {
-        return em_nan();
+        return em_numeric_nan();
     }
     return (*_expr->EmFunc)(_expr->EmArgs, _expr->EmCount); 
 }

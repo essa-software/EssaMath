@@ -1,27 +1,27 @@
 #include "math_utils.h"
 #include <math.h>
 
-double em_nan(){
+double em_numeric_nan(){
     return (__builtin_nan (""));
 }
 
-_Complex double em_cnan(){
+_Complex double em_numeric_cnan(){
     return (__builtin_nan (""));
 }
 
-double em_inf(){
+double em_numeric_inf(){
     return (__builtin_inf ());
 }
 
-_Complex double em_cinf(){
+_Complex double em_numeric_cinf(){
     return (__builtin_inf ());
 }
 
-double em_factorial(double _value){
+double em_numeric_factorial(double _value){
     int res = (int)_value;
 
     if(_value != res || _value < 0){
-        return em_nan();
+        return em_numeric_nan();
     }
 
     int result = 1;
@@ -32,7 +32,7 @@ double em_factorial(double _value){
     return (double)result;
 }
 
-int em_isinteger(double _value){
+int em_numeric_isinteger(double _value){
     return (int)_value == _value;
 }
 
@@ -100,23 +100,23 @@ const double ZETAS_NEG[130] = {
     8.7601563446229215e306
 };
 
-int em_iseven(int64_t n) { return n % 2 == 0; }
+int em_numeric_iseven(int64_t n) { return n % 2 == 0; }
 
-double em_zeta(int64_t n){
+double em_numeric_zeta(int64_t n){
    if (n < 0) {
-      if (em_iseven(n)) {
+      if (em_numeric_iseven(n)) {
          return 0.0;
       } else if (-(1 + n)/2 < (int64_t)(sizeof(ZETAS_NEG)/sizeof(ZETAS_NEG[0]))) {
          return ZETAS_NEG[-(1 + n)/2];
-      } else if (em_iseven((1 - n)/2)) {
-         return em_inf();
+      } else if (em_numeric_iseven((1 - n)/2)) {
+         return em_numeric_inf();
       } else {
-         return -em_inf();
+         return -em_numeric_inf();
       }
    } else if (n == 0) {
       return -0.5;
    } else if (n == 1) {
-      return em_inf();
+      return em_numeric_inf();
    } else if ((n - 2) < (int64_t)(sizeof(ZETAS_POS)/sizeof(ZETAS_POS[0]))) {
       return ZETAS_POS[n - 2];
    }
@@ -133,7 +133,7 @@ double digamma(int64_t n)
    };
 
    if (n <= 0) {
-      return em_nan();
+      return em_numeric_nan();
    }
 
    double res = 0;
@@ -155,10 +155,10 @@ double digamma(int64_t n)
 }
 
 /// harmonic number n
-double em_harmonic(int64_t n)
+double em_numeric_harmonic(int64_t n)
 {
    if (n <= 0) {
-      return em_nan();
+      return em_numeric_nan();
    } else if (n < 20) {
       double sum = 1;
       for (int64_t k = 2; k <= n; ++k) {
@@ -233,17 +233,17 @@ const double NEG_ETA_NEG_N[] = {
 };
 
 /// negative Dirichlet eta function
-double em_neg_eta(int64_t n)
+double em_numeric_neg_eta(int64_t n)
 {
    if (n < 0) {
-      if (em_iseven(n)) {
+      if (em_numeric_iseven(n)) {
          return 0.0;
       } else if (-(1 + n)/2 < (int64_t)(sizeof(NEG_ETA_NEG_N)/sizeof(NEG_ETA_NEG_N[0]))) {
          return NEG_ETA_NEG_N[-(1 + n)/2];
-      } else if (em_iseven((1 - n)/2)) {
-         return em_inf();
+      } else if (em_numeric_iseven((1 - n)/2)) {
+         return em_numeric_inf();
       } else {
-         return -em_inf();
+         return -em_numeric_inf();
       }
    } else if (n == 0) {
       return -0.5;
