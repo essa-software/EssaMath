@@ -22,6 +22,9 @@ set(SOURCES
   18_differentiation.c
   19_integration.c
   20_equations.c
+  21_differential_equations.c
+  22_numerical.c
+  23_matrices_and_linear_algebra.c
 )
 file(GLOB_RECURSE HEADERS_PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
 file(GLOB_RECURSE CORE_LISP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/maxima/src/*.lisp" "${CMAKE_CURRENT_SOURCE_DIR}/maxima/src/*.asd")

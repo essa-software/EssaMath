@@ -22,7 +22,7 @@ int em_integrate(em_object _expr, em_object _x){
 }
 
 int em_integrate_2(em_object _expr, em_object _x, em_object _a, em_object _b){
-    return em_invoke("integrate_", 4, _expr, _x, _a, _b);
+    return em_invoke("integrate", 4, _expr, _x, _a, _b);
 }
 
 int em_laplace(em_object _expr, em_object _t, em_object _s){
