@@ -32,6 +32,9 @@ set(SOURCES
   28_sums_products_and_series.c
   29_number_theory.c
   30_symmetries.c
+  31_runtime_environment.c
+  35_sets.c
+  36_function_definition.c
 )
 file(GLOB_RECURSE HEADERS_PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
 file(GLOB_RECURSE CORE_LISP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/maxima/src/*.lisp" "${CMAKE_CURRENT_SOURCE_DIR}/maxima/src/*.asd")

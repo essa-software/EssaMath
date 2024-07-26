@@ -181,3 +181,11 @@ int em_permut(em_object _L){
     return em_invoke("permut", 1, _L);
 }
 
+int em_todd_coxeter(em_object _relations){
+    return em_invoke("todd_coxeter", 1, _relations);
+}
+
+int em_todd_coxeter_2(em_object _relations, em_object subgroup){
+    return em_invoke("todd_coxeter", 2, _relations, subgroup);
+}
+

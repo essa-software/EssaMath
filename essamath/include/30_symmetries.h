@@ -52,6 +52,8 @@ int em_resolvante_unitaire(em_object _P, em_object _Q, em_object _x);
 int em_resolvante_vierer(em_object _P, em_object _x);
 int em_multinomial(em_object _r, em_object _part);
 int em_permut(em_object _L);
+int em_todd_coxeter(em_object _relations);
+int em_todd_coxeter_2(em_object _relations, em_object subgroup);
 
 #ifdef __cplusplus
 }
