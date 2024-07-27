@@ -34,7 +34,7 @@ int em_dispcon(size_t n, ...){
 }
 
 int em_dispconall(){
-    return em_invoke("dispcon", 1, em_create_string("all"));
+    return em_invoke("dispcon", 1, em_createstring("all"));
 }
 
 int em_entertensor(em_object _name){
@@ -98,7 +98,7 @@ int em_remcon(size_t n, ...){
 }
 
 int em_remconall(){
-    return em_invoke("remcon", 1, em_create_string("all"));
+    return em_invoke("remcon", 1, em_createstring("all"));
 }
 
 int em_contract(em_object _expr){
@@ -289,7 +289,7 @@ int em_remcoord(size_t n, ...){
 }
 
 int em_remcoordall(){
-    return em_invoke("remcoordall", 1, em_create_string("all"));
+    return em_invoke("remcoordall", 1, em_createstring("all"));
 }
 
 int em_makebox(em_object _expr, em_object _g){

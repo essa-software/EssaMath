@@ -1,9 +1,13 @@
 #pragma once
 
+#include "expression.h"
+#include "essamath.h"
 #include <complex>
 #include <functional>
 #include <string>
 #include <vector>
+
+#define EPS 1e-6
 
 struct TestOptionsReal{
     std::string _varname;
@@ -18,3 +22,14 @@ struct TestOptionsComplex{
 };
 
 bool test_complex(std::string const& _exprstring, std::function<std::complex<double>(std::vector<std::complex<double>> const&)> const& _exprtest, std::vector<TestOptionsComplex> const& _options, bool _verbose = false);
+
+template<typename... Args>
+bool test_numeric_function(int (*_foo)(Args...), double _expected, Args... _args){
+    if(_foo && _foo(_args...) == EM_RTNORM){
+        auto expr = em_getexpr(em_getlastoutput());
+        auto e = em_createexpression(expr, 0, nullptr, nullptr);
+        return EM_NEAREQUAL(em_calculateexpr(e), _expected, EPS);
+    }
+
+    return false;
+}

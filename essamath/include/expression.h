@@ -37,9 +37,10 @@ void em_printf(em_object _toprint);
 void em_tostring(em_object _toprint, char* _buf, size_t _size);
 void em_rellist(em_object _tofree);
 em_object em_getexpr(em_object _identifier);
+em_object em_clonelist(em_object _other);
 
-em_object em_create_string(const char* _str);
-em_object em_create_number(double _number);
+em_object em_createstring(const char* _str);
+em_object em_createnumber(double _number);
 
 #define EM_EXPRUND    3000
 #define EM_EXPRNUM    3001
@@ -58,9 +59,10 @@ struct EmValueNode{
 };
 
 struct EmExpression{
+    em_object EmHead;
     struct EmValueNode** EmArgs;
     size_t EmCount;
-    double (*EmFunc)(struct EmValueNode**, size_t);
+    double (*EmFunc)(em_object, struct EmValueNode**, size_t);
     _Complex int (*EmDomain)(struct EmValueNode**, size_t);
 };
 union EmExprComplexValue{
@@ -75,9 +77,10 @@ struct EmComplexValueNode{
 };
 
 struct EmComplexExpression{
+    em_object EmHead;
     struct EmComplexValueNode** EmArgs;
     size_t EmCount;
-    _Complex double (*EmFunc)(struct EmComplexValueNode**, size_t);
+    _Complex double (*EmFunc)(em_object, struct EmComplexValueNode**, size_t);
     _Complex int (*EmDomain)(struct EmComplexValueNode**, size_t);
 };
 

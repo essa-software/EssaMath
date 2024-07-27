@@ -130,7 +130,7 @@ int em_remvalue(size_t n, ...){
 }
 
 int em_remvalueall(){
-    return em_invoke("remvalueall", 1, em_create_string("all"));
+    return em_invoke("remvalueall", 1, em_createstring("all"));
 }
 
 int em_rncombine(em_object _expr){

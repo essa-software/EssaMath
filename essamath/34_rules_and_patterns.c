@@ -169,7 +169,7 @@ int em_disprule(size_t n, ...){
 }
 
 int em_dispruleall(){
-    return em_invoke("disprule", 1, em_create_string("all"));
+    return em_invoke("disprule", 1, em_createstring("all"));
 }
 
 int em_let(em_object _prod, em_object _repl, em_object _prodname, size_t n, ...){
@@ -297,11 +297,11 @@ int em_remlet_2(em_object _prod, em_object _name){
 }
 
 int em_remletall(){
-    return em_invoke("remlet", 1, em_create_string("all"));
+    return em_invoke("remlet", 1, em_createstring("all"));
 }
 
 int em_remletall_2(em_object _name){
-    return em_invoke("remlet", 2, em_create_string("all"), _name);
+    return em_invoke("remlet", 2, em_createstring("all"), _name);
 }
 
 int em_remrule(em_object _op, em_object _rulename){
@@ -309,7 +309,7 @@ int em_remrule(em_object _op, em_object _rulename){
 }
 
 int em_remruleall(em_object _op){
-    return em_invoke("remrule", 2, _op, em_create_string("all"));
+    return em_invoke("remrule", 2, _op, em_createstring("all"));
 }
 
 int em_tellsimp(em_object _pattern, em_object _replacement){

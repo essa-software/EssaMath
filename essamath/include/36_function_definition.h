@@ -1,7 +1,7 @@
-// 35_sets.h
+// 36_function_definition.h
 #include "expression.h"
-#ifndef SETS_H
-#define SETS_H
+#ifndef FUNCTION_DEFINITION_H
+#define FUNCTION_DEFINITION_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,4 +51,4 @@ int em_declare_translated(size_t n, ...);
 }
 #endif
 
-#endif // SETS_H
+#endif // FUNCTION_DEFINITION_H

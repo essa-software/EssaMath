@@ -94,7 +94,7 @@ int em_dispform(em_object _expr){
 }
 
 int em_dispformall(em_object _expr){
-    return em_invoke("dispform", 2, _expr, em_create_string("all"));
+    return em_invoke("dispform", 2, _expr, em_createstring("all"));
 }
 
 int em_dpart(em_object _expr, size_t n, ...){

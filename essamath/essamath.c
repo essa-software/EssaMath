@@ -24,6 +24,8 @@ void em_initmath(void){
     *argv = (char*)malloc((size_t)count);
     strncpy(*argv, buf, (size_t)count);
 
+    printf("%s\n", argv[0]);
+
     ecl_set_option(ECL_OPT_TRAP_SIGSEGV, FALSE);
     ecl_set_option(ECL_OPT_TRAP_SIGFPE, FALSE);
     ecl_set_option(ECL_OPT_TRAP_SIGINT, FALSE);

@@ -172,11 +172,11 @@ int em_compfile(em_object _filename, size_t n, ...){
 }
 
 int em_compfilefunctions(em_object _filename){
-    return em_invoke("compfile", 2, _filename, em_create_string("functions"));
+    return em_invoke("compfile", 2, _filename, em_createstring("functions"));
 }
 
 int em_compfileall(em_object _filename){
-    return em_invoke("compfileall", 2, _filename, em_create_string("functions"));
+    return em_invoke("compfileall", 2, _filename, em_createstring("functions"));
 }
 
 int em_compile(size_t n, ...){
@@ -208,11 +208,11 @@ int em_compile(size_t n, ...){
 }
 
 int em_compilefunctions(){
-    return em_invoke("compile", 1, em_create_string("functions"));
+    return em_invoke("compile", 1, em_createstring("functions"));
 }
 
 int em_compileall(){
-    return em_invoke("compileall", 1, em_create_string("all"));
+    return em_invoke("compileall", 1, em_createstring("all"));
 }
 
 int em_define(em_object _f, em_object _expr){
@@ -252,7 +252,7 @@ int em_dispfun(size_t n, ...){
 }
 
 int em_dispfunall(){
-    return em_invoke("dispfun", 1, em_create_string("all"));
+    return em_invoke("dispfun", 1, em_createstring("all"));
 }
 
 int em_fullmap(em_object _f, size_t n, ...){
@@ -473,7 +473,7 @@ int em_remfunction(size_t n, ...){
 }
 
 int em_remfunctionall(){
-    return em_invoke("remfunction", 1, em_create_string("all"));
+    return em_invoke("remfunction", 1, em_createstring("all"));
 }
 
 int em_translate(size_t n, ...){
@@ -505,11 +505,11 @@ int em_translate(size_t n, ...){
 }
 
 int em_translatefunctions(){
-    return em_invoke("translate", 1, em_create_string("functions"));
+    return em_invoke("translate", 1, em_createstring("functions"));
 }
 
 int em_translateall(){
-    return em_invoke("translate", 1, em_create_string("all"));
+    return em_invoke("translate", 1, em_createstring("all"));
 }
 
 int em_translate_file(em_object _maxima_filename, em_object _lisp_filename){
