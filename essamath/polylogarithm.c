@@ -1,4 +1,5 @@
 #include "polylogarithm.h"
+#include "expression.h"
 #include "math_utils.h"
 #include <float.h>
 #include <complex.h>
@@ -681,7 +682,10 @@ double _Complex Li_unity_neg(int64_t n, double _Complex z)
     }
 
     do {
-        term = em_numeric_zeta(n - k)/em_numeric_factorial((double)k)*lnzk;
+         em_val fact;
+         em_numeric_factorial(&fact, em_createreal((double)k));
+
+        term = em_numeric_zeta(n - k)/em_getdouble(fact)*lnzk;
         if (!is_finite(term)) { break; }
         sum_old = sum;
         sum += term;
@@ -702,14 +706,20 @@ double _Complex Li_rest(int64_t n, double _Complex z)
     double _Complex sum = 0, old_sum;
 
     for (int64_t k = kmax; k != 0; --k) {
-        const double ifac = 1/em_numeric_factorial((double)n - 2*(double)k);
+         em_val fact;
+         em_numeric_factorial(&fact, em_createreal((double)n - 2*(double)k));
+
+        const double ifac = 1/em_getdouble(fact);
         if (ifac == 0) { return 2.0*sum; }
         sum += em_numeric_neg_eta(2*k)*ifac*p;
         p *= lnz2;
         if (sum == old_sum) { break; }
     }
 
-    return 2.0*sum - p/em_numeric_factorial((double)n);
+    em_val fact;
+    em_numeric_factorial(&fact, em_createreal((double)n));
+
+    return 2.0*sum - p/em_getdouble(fact);
 }
 
 double norm(double _Complex z){
@@ -719,14 +729,14 @@ double norm(double _Complex z){
 double _Complex em_numeric_li(int64_t n, double _Complex z)
 {
    if (isnan(creal(z)) || isnan(cimag(z))) {
-      return em_numeric_nan();
+      return __builtin_nan("");
    } else if (isinf(creal(z)) || isinf(cimag(z))) {
-      return -em_numeric_inf();
+      return -__builtin_inf();
    } else if (z == 0.0) {
       return z;
    } else if (z == 1.0) {
       if (n <= 0) {
-         return em_numeric_inf() + em_numeric_inf() * I;
+         return __builtin_inf() + __builtin_inf() * I;
       }
       return em_numeric_zeta(n) + cimag(z) * I;
    } else if (z == -1.0) {

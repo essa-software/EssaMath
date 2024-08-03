@@ -338,6 +338,91 @@ void em_tostring_helper(em_object _current, char* _buf, size_t _size, size_t* _b
     }
 }
 
+_Complex double em_complex(double _real, double _imag){
+    return _real + (double)I * _imag;
+}
+
+struct EmNumericValue em_createreal(double _number){
+    struct EmNumericValue result;
+    result.emType = EM_VALREAL;
+    result.emValue.emReal = _number;
+
+    return result;
+}
+
+struct EmNumericValue em_createcomplex(_Complex double _number){
+    struct EmNumericValue result;
+    result.emType = EM_VALCOMPLEX;
+    result.emValue.emComplex = _number;
+
+    return result;
+}
+
+struct EmNumericValue em_createvector(em_val* _number, size_t _size){
+    struct EmNumericValue result;
+    result.emType = EM_VALVECTOR;
+    result.emValue.emVector.emData = _number;
+    result.emValue.emVector.emSize = _size;
+
+    return result;
+}
+
+// struct EmNumericValue em_creatematrix(em_val** _number, size_t _rows, size_t _cols){
+//     struct EmNumericValue result;
+//     result.emType = EM_VALMATRIX;
+//     result.emValue.emMatrix.emData = _number;
+//     result.emValue.emMatrix.EmRows = _rows;
+//     result.emValue.emMatrix.EmCols = _cols;
+
+//     return result;
+// }
+
+double em_getdouble(em_val _value){
+    switch (_value.emType) {
+        case EM_VALREAL:
+            return _value.emValue.emReal;
+        case EM_VALCOMPLEX:{
+            if(cimag(_value.emValue.emComplex) != 0){
+                return __builtin_nan("");
+            }
+
+            return creal(_value.emValue.emComplex);
+        }
+        default:
+            return __builtin_nan("");
+    }
+}
+
+_Complex double em_getcomplex(em_val _value){
+    switch (_value.emType) {
+        case EM_VALREAL:
+            return _value.emValue.emReal;
+        case EM_VALCOMPLEX:
+            return _value.emValue.emComplex;
+        default:
+            return __builtin_nan("");
+    }
+}
+
+size_t em_getvectorsize(em_val _value){
+    switch (_value.emType) {
+        case EM_VALVECTOR:
+            return _value.emValue.emVector.emSize;
+        default:
+            return 0;
+    }
+}
+
+em_val* em_getvectordata(em_val _value){
+    switch (_value.emType) {
+        case EM_VALVECTOR:
+            return _value.emValue.emVector.emData;
+        default:
+            return NULL;
+    }
+}
+
+
 void em_tostring(em_object _current, char* _buf, size_t _size) {
     size_t buf_pos = 0;
     em_tostring_helper(_current, _buf, _size, &buf_pos, 0);
@@ -381,7 +466,7 @@ em_object em_getexpr(em_object _identifier){
 }
 
 
-struct EmValueNode* em_createexpressiondouble_helper(em_object _current, size_t _varcount, const char** _varlist, double** _vardata) {
+struct EmValueNode* em_createexpression_helper(em_object _current, size_t _varcount, const char** _varlist, em_val** _vardata) {
     if (_current == NULL) { return NULL;}
 
     struct EmValueNode* result = (struct EmValueNode*)malloc(sizeof(struct EmValueNode));
@@ -389,7 +474,7 @@ struct EmValueNode* em_createexpressiondouble_helper(em_object _current, size_t 
     switch (_current->emType) {
         case EM_NUMBER: {
             result->emType = EM_EXPRNUM;
-            result->emVal.emNumber = _current->emVal.emNumber;
+            result->emVal.emNumber = em_createreal(_current->emVal.emNumber);
             // printf("Number: %g\n", _current->emVal.emNumber);
             break;
         }
@@ -399,19 +484,19 @@ struct EmValueNode* em_createexpressiondouble_helper(em_object _current, size_t 
                     // printf("Constant: %s\n", _current->emVal.emString);
                     if(strcmp(_current->emVal.emString, "$%pi") == 0){
                         result->emType = EM_EXPRNUM;
-                        result->emVal.emNumber = M_PI;
+                        result->emVal.emNumber = em_numeric_pi();
                     }else if(strcmp(_current->emVal.emString, "$%e") == 0){
                         result->emType = EM_EXPRNUM;
-                        result->emVal.emNumber = M_E;
+                        result->emVal.emNumber = em_numeric_e();
                     }else if(strcmp(_current->emVal.emString, "$%i") == 0){
                         result->emType = EM_EXPRNUM;
-                        result->emVal.emNumber = (double)I;
+                        result->emVal.emNumber = em_numeric_i();
                     }else if(strcmp(_current->emVal.emString, "$%inf") == 0){
                         result->emType = EM_EXPRNUM;
-                        result->emVal.emNumber = (double)INFINITY;
+                        result->emVal.emNumber = em_numeric_inf();
                     }else if(strcmp(_current->emVal.emString, "$%minf") == 0){
                         result->emType = EM_EXPRNUM;
-                        result->emVal.emNumber = -(double)INFINITY;
+                        result->emVal.emNumber = em_numeric_inf();
                     }else if(strcmp(_current->emVal.emString, "$%phi") == 0){
                         result->emType = EM_EXPRNUM;
                         result->emVal.emNumber = em_numeric_phi();
@@ -442,7 +527,7 @@ struct EmValueNode* em_createexpressiondouble_helper(em_object _current, size_t 
     return result;
 }
 
-em_expr em_createexpression(em_object _current, size_t _varcount, const char** _varlist, double** _vardata){
+em_expr em_createexpression(em_object _current, size_t _varcount, const char** _varlist, em_val** _vardata){
     if (_current == NULL) { return NULL;}
 
     em_expr result = (em_expr)malloc(sizeof(struct EmExpression));
@@ -450,11 +535,11 @@ em_expr em_createexpression(em_object _current, size_t _varcount, const char** _
     switch (_current->emType) {
         case EM_NUMBER: {
         case EM_STRING:
-            result->EmCount = 1;
-            result->EmHead = NULL;
-            result->EmFunc = em_getfunctionptr("dummy");
-            result->EmArgs = (struct EmValueNode**)malloc(sizeof(struct EmValueNode*));
-            result->EmArgs[0] = em_createexpressiondouble_helper(_current, _varcount, _varlist, _vardata);
+            result->emCount = 1;
+            result->emHead = NULL;
+            result->emFunc = em_getfunctionptr("dummy");
+            result->emArgs = (struct EmValueNode**)malloc(sizeof(struct EmValueNode*));
+            result->emArgs[0] = em_createexpression_helper(_current, _varcount, _varlist, _vardata);
             break;
         }
         case EM_LIST: {
@@ -471,17 +556,17 @@ em_expr em_createexpression(em_object _current, size_t _varcount, const char** _
                     current = current->emNext;
                 }
                 if (name != NULL && name->emType == EM_STRING) {
-                    result->EmCount = count;
-                    result->EmHead = em_clonelist(name);
-                    result->EmArgs = (struct EmValueNode**)malloc(count * sizeof(struct EmValueNode*));
+                    result->emCount = count;
+                    result->emHead = em_clonelist(name);
+                    result->emArgs = (struct EmValueNode**)malloc(count * sizeof(struct EmValueNode*));
                     if(name->emVal.emString[0] == 'm' || name->emVal.emString[0] == '%'){
-                        result->EmFunc = em_getfunctionptr(&name->emVal.emString[1]);
+                        result->emFunc = em_getfunctionptr(&name->emVal.emString[1]);
                     }else{
-                        result->EmFunc = em_getfunctionptr(name->emVal.emString);
+                        result->emFunc = em_getfunctionptr(name->emVal.emString);
                     }
-                    // printf("Name: %s\t%zx\n", name->emVal.emString, (size_t)result->EmFunc);
+                    // printf("Name: %s\t%zx\n", name->emVal.emString, (size_t)result->emFunc);
                     for(size_t i = 0; i < count; i++){
-                        result->EmArgs[i] = em_createexpressiondouble_helper(list, _varcount, _varlist, _vardata);
+                        result->emArgs[i] = em_createexpression_helper(list, _varcount, _varlist, _vardata);
                         list = list->emNext;
                     }
                 }
@@ -495,134 +580,14 @@ em_expr em_createexpression(em_object _current, size_t _varcount, const char** _
     return result;
 }
 
-
-struct EmComplexValueNode* em_createcomplexexpression_helper(em_object _current, size_t _varcount, const char** _varlist, _Complex double** _vardata) {
-    if (_current == NULL) { return NULL;}
-
-    struct EmComplexValueNode* result = (struct EmComplexValueNode*)malloc(sizeof(struct EmComplexValueNode));
-
-    switch (_current->emType) {
-        case EM_NUMBER: {
-            result->emType = EM_EXPRNUM;
-            result->emVal.emNumber = _current->emVal.emNumber;
-            break;
-        }
-        case EM_STRING: {
-            if (_current->emVal.emString[0] == '$') {
-                if(_current->emVal.emString[1] == '%'){
-                    // printf("Constant: %s\n", _current->emVal.emString);
-                    if(strcmp(_current->emVal.emString, "$%pi") == 0){
-                        result->emType = EM_EXPRNUM;
-                        result->emVal.emNumber = M_PI;
-                    }else if(strcmp(_current->emVal.emString, "$%e") == 0){
-                        result->emType = EM_EXPRNUM;
-                        result->emVal.emNumber = M_E;
-                    }else if(strcmp(_current->emVal.emString, "$%i") == 0){
-                        result->emType = EM_EXPRNUM;
-                        result->emVal.emNumber = (__extension__ 1.0i);
-                    }else if(strcmp(_current->emVal.emString, "$%inf") == 0){
-                        result->emType = EM_EXPRNUM;
-                        result->emVal.emNumber = (double)INFINITY;
-                    }else if(strcmp(_current->emVal.emString, "$%minf") == 0){
-                        result->emType = EM_EXPRNUM;
-                        result->emVal.emNumber = -(double)INFINITY;
-                    }else if(strcmp(_current->emVal.emString, "$%phi") == 0){
-                        result->emType = EM_EXPRNUM;
-                        result->emVal.emNumber = (1.0+sqrt(5))/2.0;
-                    }else{
-                        result->emType = EM_EXPREXP;
-                    }
-                }else{
-                    result->emType = EM_EXPRVAR;
-                    for(size_t i = 0; i < _varcount; i++){
-                        if(strcmp(&_current->emVal.emString[1], _varlist[i]) == 0){
-                            result->emVal.emVariable = _vardata[i];
-                            // printf("Variable: %s\t%zx\n", &_current->emVal.emString[1], (size_t)_vardata[i]);
-                        }
-                    }
-                }
-            }
-            break;
-        }
-        case EM_LIST: {
-            result->emType = EM_EXPREXP;
-            result->emVal.emExpr = em_createcomplexexpression(_current, _varcount, _varlist, _vardata);
-            break;
-        }
-        default:
-        break;
-    }
-
-    return result;
-}
-
-em_complexexpr em_createcomplexexpression(em_object _current, size_t _varcount, const char** _varlist, _Complex double** _vardata){
-    if (_current == NULL) { return NULL;}
-
-    em_complexexpr result = (em_complexexpr)malloc(sizeof(struct EmComplexExpression));
-
-    switch (_current->emType) {
-        case EM_NUMBER: {
-        case EM_STRING:
-            result->EmCount = 1;
-            result->EmHead = NULL;
-            result->EmFunc = em_getcomplexfunctionptr("dummy");
-            result->EmArgs = (struct EmComplexValueNode**)malloc(sizeof(struct EmComplexValueNode*));
-            result->EmArgs[0] = em_createcomplexexpression_helper(_current, _varcount, _varlist, _vardata);
-            break;
-        }
-        case EM_LIST: {
-            em_object list = _current->emVal.emList;
-
-            if(list != NULL){
-                em_object name = list->emVal.emList;
-                list = list->emNext;
-                size_t count = 0;
-
-                em_object current = list;
-                while(current){
-                    count++;
-                    current = current->emNext;
-                }
-                if (name != NULL && name->emType == EM_STRING) {
-                    result->EmCount = count;
-                    result->EmHead = em_clonelist(name);
-                    result->EmArgs = (struct EmComplexValueNode**)malloc(count * sizeof(struct EmComplexValueNode*));
-                    if(name->emVal.emString[0] == 'm' || name->emVal.emString[0] == '%'){
-                        result->EmFunc = em_getcomplexfunctionptr(&name->emVal.emString[1]);
-                    }else{
-                        result->EmFunc = em_getcomplexfunctionptr(name->emVal.emString);
-                    }
-                    for(size_t i = 0; i < count; i++){
-                        result->EmArgs[i] = em_createcomplexexpression_helper(list, _varcount, _varlist, _vardata);
-                        list = list->emNext;
-                    }
-                }
-                break;
-            }
-        }
-        default:
-        break;
-    }
-
-    return result;
-}
-
-double em_calculateexpr(em_expr _expr){
-    if(!_expr->EmFunc) {
+em_val em_calculateexpr(em_expr _expr){
+    if(!_expr->emFunc) {
         return em_numeric_nan();
     }
-    return (*_expr->EmFunc)(_expr->EmHead, _expr->EmArgs, _expr->EmCount); 
+    return (*_expr->emFunc)(_expr->emHead, _expr->emArgs, _expr->emCount); 
 }
 
-_Complex double em_calculatecomplexexpr(em_complexexpr _expr){
-    if(!_expr->EmFunc) {
-        return 0.0;
-    }
-    return (*_expr->EmFunc)(_expr->EmHead, _expr->EmArgs, _expr->EmCount);
-}
-
-double em_calculateexprnode(struct EmValueNode* _expr){
+em_val em_calculateexprnode(struct EmValueNode* _expr){
     switch (_expr->emType) {
         case EM_EXPRNUM:
             return _expr->emVal.emNumber;
@@ -634,54 +599,21 @@ double em_calculateexprnode(struct EmValueNode* _expr){
         break;
     }
 
-    return 0.0;
-}
-
-_Complex double em_calculatecomplexexprnode(struct EmComplexValueNode* _expr){
-    switch (_expr->emType) {
-        case EM_EXPRNUM:
-            return _expr->emVal.emNumber;
-        case EM_EXPRVAR:
-            return *_expr->emVal.emVariable;
-        case EM_EXPREXP:
-            return em_calculatecomplexexpr(_expr->emVal.emExpr);
-        default:
-        break;
-    }
-
-    return 0.0;
+    return em_createreal(0.0);
 }
 
 void em_relexpr(em_expr _tofree){
-    for(size_t i = 0; i < _tofree->EmCount; i++){
-        em_relexprnode(_tofree->EmArgs[i]);
+    for(size_t i = 0; i < _tofree->emCount; i++){
+        em_relexprnode(_tofree->emArgs[i]);
     }
-    free(_tofree->EmArgs);
-    em_rellist(_tofree->EmHead);
-}
-
-void em_relcomplexexpr(em_complexexpr _tofree){
-    for(size_t i = 0; i < _tofree->EmCount; i++){
-        em_relcomplexexprnode(_tofree->EmArgs[i]);
-    }
-    free(_tofree->EmArgs);
-    em_rellist(_tofree->EmHead);
+    free(_tofree->emArgs);
+    em_rellist(_tofree->emHead);
 }
 
 void em_relexprnode(struct EmValueNode* _tofree){
     switch (_tofree->emType) {
         case EM_EXPREXP:
             em_relexpr(_tofree->emVal.emExpr);
-            break;
-        default:
-        break;
-    }
-}
-
-void em_relcomplexexprnode(struct EmComplexValueNode* _tofree){
-    switch (_tofree->emType) {
-        case EM_EXPREXP:
-            em_relcomplexexpr(_tofree->emVal.emExpr);
             break;
         default:
         break;

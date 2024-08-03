@@ -8,13 +8,8 @@ extern "C" {
 #endif
 
 void em_inithashmapdouble(void);
-void em_inithashmapcomplex(void);
-
-double (*em_getfunctionptr(const char* _funcname))(em_object, struct EmValueNode**, size_t);
-_Complex double (*em_getcomplexfunctionptr(const char* _funcname))(em_object, struct EmComplexValueNode**, size_t);
-
+em_val (*em_getfunctionptr(const char* _funcname))(em_object, struct EmValueNode**, size_t);
 void em_freehashmapdouble(void);
-void em_freehashmapcomplex(void);
 
 #ifdef __cplusplus
 }

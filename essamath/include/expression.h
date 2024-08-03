@@ -17,14 +17,14 @@ struct EmList;
 #define EM_RTNORM   2001
 #define EM_RTERROR  2002
 
-union EmValue{
+union EmListValue{
     double emNumber;
     char* emString;
     struct EmList* emList;
 };
 
 struct EmList{
-    union EmValue emVal;
+    union EmListValue emVal;
     int emType;
     struct EmList* emNext;
 };
@@ -47,9 +47,51 @@ em_object em_createnumber(double _number);
 #define EM_EXPRVAR    3002
 #define EM_EXPREXP    3003
 
+#define EM_VALUND       3000
+#define EM_VALREAL      3001
+#define EM_VALCOMPLEX   3002
+#define EM_VALVECTOR    3003
+// #define EM_VALMATRIX    3004
+
+struct EmNumericValue;
+#define em_val struct EmNumericValue
+struct EmVector{
+    size_t emSize;
+    em_val* emData;
+};
+
+// struct EmMatrix{
+//     size_t EmRows, EmCols;
+//     em_val** emData;
+// };
+
+union EmValue{
+    double emReal;
+    _Complex double emComplex;
+    struct EmVector emVector;
+    // struct EmMatrix emMatrix;
+};
+
+struct EmNumericValue{
+    union EmValue emValue;
+    int emType;
+};
+
+_Complex double em_complex(double _real, double _imag);
+
+em_val em_createreal(double _number);
+em_val em_createcomplex(_Complex double _number);
+em_val em_createvector(em_val* _number, size_t _size);
+// em_val em_creatematrix(em_val** _number, size_t _rows, size_t _cols);
+
+double em_getdouble(em_val _value);
+_Complex double em_getcomplex(em_val _value);
+size_t em_getvectorsize(em_val _value);
+em_val* em_getvectordata(em_val _value);
+
 union EmExprValue{
-    double emNumber;
-    double* emVariable;
+    em_val emNumber;
+    em_val* emVariable;
     struct EmExpression* emExpr;
 };
 
@@ -59,47 +101,20 @@ struct EmValueNode{
 };
 
 struct EmExpression{
-    em_object EmHead;
-    struct EmValueNode** EmArgs;
-    size_t EmCount;
-    double (*EmFunc)(em_object, struct EmValueNode**, size_t);
-    _Complex int (*EmDomain)(struct EmValueNode**, size_t);
-};
-union EmExprComplexValue{
-    _Complex double emNumber;
-    _Complex double* emVariable;
-    struct EmComplexExpression* emExpr;
-};
-
-struct EmComplexValueNode{
-    union EmExprComplexValue emVal;
-    int emType;
-};
-
-struct EmComplexExpression{
-    em_object EmHead;
-    struct EmComplexValueNode** EmArgs;
-    size_t EmCount;
-    _Complex double (*EmFunc)(em_object, struct EmComplexValueNode**, size_t);
-    _Complex int (*EmDomain)(struct EmComplexValueNode**, size_t);
+    em_object emHead;
+    struct EmValueNode** emArgs;
+    size_t emCount;
+    em_val (*emFunc)(em_object, struct EmValueNode**, size_t);
 };
 
 #define em_expr struct EmExpression*
-#define em_complexexpr struct EmComplexExpression*
+em_expr em_createexpression(em_object _object, size_t _varcount, const char** _varlist, em_val** _vardata);
 
-em_expr em_createexpression(em_object _object, size_t _varcount, const char** _varlist, double** _vardata);
-em_complexexpr em_createcomplexexpression(em_object _object, size_t _varcount, const char** _varlist, _Complex double** _vardata);
-
-double em_calculateexpr(em_expr _expr);
-_Complex double em_calculatecomplexexpr(em_complexexpr _expr);
-
-double em_calculateexprnode(struct EmValueNode* _expr);
-_Complex double em_calculatecomplexexprnode(struct EmComplexValueNode* _expr);
+em_val em_calculateexpr(em_expr _expr);
+em_val em_calculateexprnode(struct EmValueNode* _expr);
 
 void em_relexpr(em_expr _tofree);
-void em_relcomplexexpr(em_complexexpr _tofree);
 void em_relexprnode(struct EmValueNode* _tofree);
-void em_relcomplexexprnode(struct EmComplexValueNode* _tofree);
 
 #define EM_NEAREQUAL(_lhs, _rhs, _eps) \
 (fabs((_lhs) - (_rhs)) <= (_eps))

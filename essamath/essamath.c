@@ -8,7 +8,6 @@
 #include <string.h>
 #include <unistd.h>
 #include "expression_functions.h"
-#include "expression_domain.h"
 
 void init_lib_MAXIMA(cl_object);
 
@@ -46,16 +45,10 @@ void em_initmath(void){
     cl_eval(c_string_to_object("(setf $errormsg 0)"));
 
     em_inithashmapdouble();
-    em_inithashmapdouble_domain();
-    em_inithashmapcomplex();
-    em_inithashmapcomplex_domain();
 }
 
 void em_freemath(void){
     em_freehashmapdouble();
-    em_freehashmapdouble_domain();
-    em_freehashmapcomplex();
-    em_freehashmapcomplex_domain();
     
     cl_shutdown();
 }

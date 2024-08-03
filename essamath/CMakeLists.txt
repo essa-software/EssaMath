@@ -4,7 +4,6 @@ set(SOURCES
   essamath.c 
   expression.c 
   expression_functions.c 
-  expression_domain.c 
   math_utils.c 
   polylogarithm.c 
   hashmap.c
