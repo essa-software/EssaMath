@@ -414,7 +414,7 @@ struct EmValueNode* em_createexpressiondouble_helper(em_object _current, size_t 
                         result->emVal.emNumber = -(double)INFINITY;
                     }else if(strcmp(_current->emVal.emString, "$%phi") == 0){
                         result->emType = EM_EXPRNUM;
-                        result->emVal.emNumber = (1.0+sqrt(5))/2.0;
+                        result->emVal.emNumber = em_numeric_phi();
                     }else{
                         result->emType = EM_EXPREXP;
                     }

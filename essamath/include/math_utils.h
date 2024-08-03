@@ -13,6 +13,9 @@ _Complex double em_numeric_cnan();
 double em_numeric_inf();
 _Complex double em_numeric_cinf();
 
+double em_numeric_phi();
+_Complex double em_numeric_cphi();
+
 int em_numeric_iseven(int64_t n);
 
 double em_numeric_factorial(double _value);

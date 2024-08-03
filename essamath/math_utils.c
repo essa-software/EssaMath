@@ -17,6 +17,14 @@ _Complex double em_numeric_cinf(){
     return (__builtin_inf ());
 }
 
+double em_numeric_phi(){
+   return (1.0+sqrt(5))/2.0;
+}
+
+_Complex double em_numeric_cphi(){
+   return (1.0+sqrt(5))/2.0;
+}
+
 double em_numeric_factorial(double _value){
     int res = (int)_value;
 

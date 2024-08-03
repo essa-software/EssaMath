@@ -5,7 +5,7 @@
 #include "math_utils.h"
 #include "test_utils.hpp"
 
-TEST(EssaMathTestsArithmetic, AdditionAndSubtraction) {
+TEST(EssaMathTestsArithmetic, AdditionAndSubtraction1) {
     em_initmath();
 
     bool result = true;
@@ -21,8 +21,17 @@ TEST(EssaMathTestsArithmetic, AdditionAndSubtraction) {
         std::vector<TestOptionsReal>{
         TestOptionsReal{._varname = "x", ._lbound = -2*M_PI, ._rbound = 2*M_PI, ._step = M_PI / 8},
         TestOptionsReal{._varname = "y", ._lbound = -2.0, ._rbound = 5.0, ._step = 1}
-    });
+    }, true);
 
+    em_freemath();
+    // Assert
+    EXPECT_TRUE(result);
+}
+
+TEST(EssaMathTestsArithmetic, AdditionAndSubtraction2) {
+    em_initmath();
+
+    bool result = true;
     result &= test_real(
             "a+b-c+2.5-%e", 
             [](std::vector<double> const& _vars) 
@@ -37,8 +46,17 @@ TEST(EssaMathTestsArithmetic, AdditionAndSubtraction) {
         TestOptionsReal{._varname = "a", ._lbound = -10.0, ._rbound = 10.0, ._step = 5.0},
         TestOptionsReal{._varname = "b", ._lbound = -7.0, ._rbound = 5.0, ._step = 5.0},
         TestOptionsReal{._varname = "c", ._lbound = 5.0, ._rbound = 15.0, ._step = 5.0}
-    });
+    }, true);
 
+    em_freemath();
+    // Assert
+    EXPECT_TRUE(result);
+}
+
+TEST(EssaMathTestsArithmeticComplex, AdditionAndSubtraction1) {
+    em_initmath();
+
+    bool result = true;
     result &= test_complex(
         "d+%i*e+%i-2*%pi", 
         [&](std::vector<std::complex<double>> const& _vars) 
@@ -52,14 +70,38 @@ TEST(EssaMathTestsArithmetic, AdditionAndSubtraction) {
         std::vector<TestOptionsComplex>{
         TestOptionsComplex{._varname = "d", ._value = std::complex<double>(1, 2), ._step = std::complex<double>(M_PI / 8, -2 * M_E), ._count = 10},
         TestOptionsComplex{._varname = "e", ._value = std::complex<double>(-3, -4), ._step = std::complex<double>(1, -M_E), ._count = 10},
-    });
+    }, true);
 
     em_freemath();
     // Assert
     EXPECT_TRUE(result);
 }
 
-TEST(EssaMathTestsArithmetic, MultiplicationAndDivision) {
+TEST(EssaMathTestsArithmeticComplex, AdditionAndSubtraction2) {
+    em_initmath();
+
+    bool result = true;
+    result &= test_complex(
+        "f+g*%i-%pi-2-f*%i+g", 
+        [&](std::vector<std::complex<double>> const& _vars) 
+            -> std::complex<double>{
+                auto _i = std::complex<double>(0, 1);
+                auto _f = _vars[0];
+                auto _g = _vars[1];
+                
+                return _f+_g*_i-M_PI-2.0-_f*_i+_g;
+            }, 
+        std::vector<TestOptionsComplex>{
+        TestOptionsComplex{._varname = "f", ._value = std::complex<double>(M_PI, 3), ._step = std::complex<double>(M_PI / 8, -2), ._count = 5},
+        TestOptionsComplex{._varname = "g", ._value = std::complex<double>(-2, -M_E), ._step = std::complex<double>(1, -M_E / 2.0), ._count = 4},
+    }, true);
+
+    em_freemath();
+    // Assert
+    EXPECT_TRUE(result);
+}
+
+TEST(EssaMathTestsArithmetic, MultiplicationAndDivision1) {
     em_initmath();
 
     bool result = true;
@@ -75,8 +117,17 @@ TEST(EssaMathTestsArithmetic, MultiplicationAndDivision) {
         std::vector<TestOptionsReal>{
         TestOptionsReal{._varname = "x", ._lbound = -2*M_PI, ._rbound = 2*M_PI, ._step = M_PI / 8},
         TestOptionsReal{._varname = "y", ._lbound = -2.0, ._rbound = 5.0, ._step = 1}
-    });
+    }, true);
 
+    em_freemath();
+    // Assert
+    EXPECT_TRUE(result);
+}
+
+TEST(EssaMathTestsArithmetic, MultiplicationAndDivision2) {
+    em_initmath();
+
+    bool result = true;
     result &= test_real(
             "(a+b-2)*c+3*a*b-4*c+%phi*b", 
             [](std::vector<double> const& _vars) 
@@ -85,7 +136,7 @@ TEST(EssaMathTestsArithmetic, MultiplicationAndDivision) {
                     auto _b = _vars[1];
                     auto _c = _vars[2];
 
-                    return (_a+_b-2)*_c+3*_a*_b-4*_c+((1.0+sqrt(5))/2.0)*_b;
+                    return (_a+_b-2)*_c+3*_a*_b-4*_c+em_numeric_phi()*_b;
                 }, 
         std::vector<TestOptionsReal>{
         TestOptionsReal{._varname = "a", ._lbound = -10.0, ._rbound = 10.0, ._step = 5.0},
@@ -93,6 +144,15 @@ TEST(EssaMathTestsArithmetic, MultiplicationAndDivision) {
         TestOptionsReal{._varname = "c", ._lbound = 5.0, ._rbound = 15.0, ._step = 5.0}
     });
 
+    em_freemath();
+    // Assert
+    EXPECT_TRUE(result);
+}
+
+TEST(EssaMathTestsArithmeticComplex, MultiplicationAndDivision1) {
+    em_initmath();
+
+    bool result = true;
     result &= test_complex(
         "(d+e*%i-1/2)*2*d*%i-%e*e + %pi*%i", 
         [&](std::vector<std::complex<double>> const& _vars) 
@@ -106,14 +166,42 @@ TEST(EssaMathTestsArithmetic, MultiplicationAndDivision) {
         std::vector<TestOptionsComplex>{
         TestOptionsComplex{._varname = "d", ._value = std::complex<double>(1, 2), ._step = std::complex<double>(M_PI / 8, -2 * M_E), ._count = 10},
         TestOptionsComplex{._varname = "e", ._value = std::complex<double>(-3, -4), ._step = std::complex<double>(1, -M_E), ._count = 10},
-    });
+    }, true);
 
     em_freemath();
     // Assert
     EXPECT_TRUE(result);
 }
 
-TEST(EssaMathTestsArithmetic, ExponentationAndFactorial) {
+TEST(EssaMathTestsArithmeticComplex, MultiplicationAndDivision2) {
+    em_initmath();
+
+    bool result = true;
+    result &= test_complex(
+        "f/g-%e*f+%pi/(%i*g)+f*g*%e", 
+        [&](std::vector<std::complex<double>> const& _vars) 
+            -> std::complex<double>{
+                auto _i = std::complex<double>(0, 1);
+                auto _f = _vars[0];
+                auto _g = _vars[1];
+
+                if(_g == 0.0 || _i*_g == 0.0){
+                    return em_numeric_nan();
+                }
+                
+                return _f/_g-M_E*_f+M_PI/(_i*_g)+_f*_g*M_E;
+            }, 
+        std::vector<TestOptionsComplex>{
+        TestOptionsComplex{._varname = "f", ._value = std::complex<double>(M_PI, 3), ._step = std::complex<double>(M_PI / 8, -2), ._count = 5},
+        TestOptionsComplex{._varname = "g", ._value = std::complex<double>(-2, -M_E), ._step = std::complex<double>(1, -M_E / 2.0), ._count = 4},
+    }, true);
+
+    em_freemath();
+    // Assert
+    EXPECT_TRUE(result);
+}
+
+TEST(EssaMathTestsArithmetic, ExponentationAndFactorial1) {
     em_initmath();
 
     bool result = true;
@@ -137,8 +225,17 @@ TEST(EssaMathTestsArithmetic, ExponentationAndFactorial) {
         std::vector<TestOptionsReal>{
         TestOptionsReal{._varname = "x", ._lbound = 0, ._rbound = 2*M_PI, ._step = M_PI / 8},
         TestOptionsReal{._varname = "y", ._lbound = 2.0, ._rbound = 5.0, ._step = 1}
-    });
+    }, true);
 
+    em_freemath();
+    // Assert
+    EXPECT_TRUE(result);
+}
+
+TEST(EssaMathTestsArithmetic, ExponentationAndFactorial2) {
+    em_initmath();
+
+    bool result = true;
     result &= test_real(
             "(a!+b!)/(c!)", 
             [](std::vector<double> const& _vars) 
@@ -153,8 +250,17 @@ TEST(EssaMathTestsArithmetic, ExponentationAndFactorial) {
         TestOptionsReal{._varname = "a", ._lbound = 1.0, ._rbound = 7.0, ._step = 2.0},
         TestOptionsReal{._varname = "b", ._lbound = 2.0, ._rbound = 7.0, ._step = 2.0},
         TestOptionsReal{._varname = "c", ._lbound = 3.0, ._rbound = 7.0, ._step = 2.0}
-    });
+    }, true);
 
+    em_freemath();
+    // Assert
+    EXPECT_TRUE(result);
+}
+
+TEST(EssaMathTestsArithmeticComplex, ExponentationAndFactorial1) {
+    em_initmath();
+
+    bool result = true;
     result &= test_complex(
         "(d+e*%i-1/(2*d*e))^(2*d*%i-%e*e) + %pi*%i/(e^d)", 
         [&](std::vector<std::complex<double>> const& _vars) 
@@ -171,7 +277,31 @@ TEST(EssaMathTestsArithmetic, ExponentationAndFactorial) {
         std::vector<TestOptionsComplex>{
         TestOptionsComplex{._varname = "d", ._value = std::complex<double>(1, 2), ._step = std::complex<double>(M_PI / 8, -2 * M_E), ._count = 10},
         TestOptionsComplex{._varname = "e", ._value = std::complex<double>(-3, -4), ._step = std::complex<double>(1, -M_E), ._count = 10},
-    });
+    }, true);
+
+    em_freemath();
+    // Assert
+    EXPECT_TRUE(result);
+}
+
+TEST(EssaMathTestsArithmeticComplex, ExponentationAndFactorial2) {
+    em_initmath();
+
+    bool result = true;
+    result &= test_complex(
+        "f^(g*%i)+2.5*f*%i+g^%e/%phi", 
+        [&](std::vector<std::complex<double>> const& _vars) 
+            -> std::complex<double>{
+                auto _i = std::complex<double>(0, 1);
+                auto _f = _vars[0];
+                auto _g = _vars[1];
+                
+                return std::pow(_f,_g*_i)+2.5*_f*_i+std::pow(_g,M_E)/em_numeric_phi();
+            }, 
+        std::vector<TestOptionsComplex>{
+        TestOptionsComplex{._varname = "f", ._value = std::complex<double>(M_PI, 3), ._step = std::complex<double>(M_PI / 8, -2), ._count = 5},
+        TestOptionsComplex{._varname = "g", ._value = std::complex<double>(-2, -M_E), ._step = std::complex<double>(1, -M_E / 2.0), ._count = 4},
+    }, true);
 
     em_freemath();
     // Assert
