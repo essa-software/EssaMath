@@ -2,8 +2,6 @@
 #include "expression.h"
 #include <stdarg.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 int em_antid(em_object _expr, em_object _x, em_object _u){
     return em_invoke("antid", 3, _expr, _x, _u);
@@ -35,56 +33,22 @@ int em_delta(em_object _t){
 
 int em_dependencies(size_t n, ...){
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
-    memset(command, 0, size);
-    strcpy(command, "dependencies");
-
-    size_t index = strlen(command);
-    command[index++] = '(';
- 
+    int result = 0;
+    
     va_start(ptr, n);
-    for (size_t i = 0; i < n; i++){
-        em_object obj = va_arg(ptr, em_object);
-        em_tostring(obj, command + index, size - index);
-        index = strlen(command);
-        command[index++] = ',';
-    }
-    command[index - 1] = ')';
- 
-    // Ending argument list traversal
+    result = em_invoke("dependencies", n, ptr);
     va_end(ptr);
-
-    int result =  em_eval(command);
-    free(command);
 
     return result;
 }
 
 int em_depends(size_t n, ...){
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
-    memset(command, 0, size);
-    strcpy(command, "depends");
-
-    size_t index = strlen(command);
-    command[index++] = '(';
- 
+    int result = 0;
+    
     va_start(ptr, n);
-    for (size_t i = 0; i < n; i++){
-        em_object obj = va_arg(ptr, em_object);
-        em_tostring(obj, command + index, size - index);
-        index = strlen(command);
-        command[index++] = ',';
-    }
-    command[index - 1] = ')';
- 
-    // Ending argument list traversal
+    result = em_invoke("depends", n, ptr);
     va_end(ptr);
-
-    int result =  em_eval(command);
-    free(command);
 
     return result;
 }
@@ -95,28 +59,11 @@ int em_derivdegree(em_object _expr, em_object _y, em_object _x){
 
 int em_derivlist(size_t n, ...){
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
-    memset(command, 0, size);
-    strcpy(command, "derivlist");
-
-    size_t index = strlen(command);
-    command[index++] = '(';
- 
+    int result = 0;
+    
     va_start(ptr, n);
-    for (size_t i = 0; i < n; i++){
-        em_object obj = va_arg(ptr, em_object);
-        em_tostring(obj, command + index, size - index);
-        index = strlen(command);
-        command[index++] = ',';
-    }
-    command[index - 1] = ')';
- 
-    // Ending argument list traversal
+    result = em_invoke("derivlist", n, ptr);
     va_end(ptr);
-
-    int result =  em_eval(command);
-    free(command);
 
     return result;
 }
@@ -135,31 +82,11 @@ int em_diff_3(em_object _expr, em_object _x, em_object _n){
 
 int em_diff_4(em_object _expr, size_t n, ...){
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
-    memset(command, 0, size);
-    strcpy(command, "diff");
-
-    size_t index = strlen(command);
-    command[index++] = '(';
-    em_tostring(_expr, command + index, size - index);
-    index = strlen(command);
-    command[index++] = ',';
- 
+    int result = 0;
+    
     va_start(ptr, n);
-    for (size_t i = 0; i < n; i++){
-        em_object obj = va_arg(ptr, em_object);
-        em_tostring(obj, command + index, size - index);
-        index = strlen(command);
-        command[index++] = ',';
-    }
-    command[index - 1] = ')';
- 
-    // Ending argument list traversal
+    result = em_invoke("diff", n + 1, _expr, ptr);
     va_end(ptr);
-
-    int result =  em_eval(command);
-    free(command);
 
     return result;
 }
@@ -170,31 +97,11 @@ int em_express(em_object _expr){
 
 int em_gradef(em_object _expr, size_t n, ...){
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
-    memset(command, 0, size);
-    strcpy(command, "gradef");
-
-    size_t index = strlen(command);
-    command[index++] = '(';
-    em_tostring(_expr, command + index, size - index);
-    index = strlen(command);
-    command[index++] = ',';
- 
+    int result = 0;
+    
     va_start(ptr, n);
-    for (size_t i = 0; i < n; i++){
-        em_object obj = va_arg(ptr, em_object);
-        em_tostring(obj, command + index, size - index);
-        index = strlen(command);
-        command[index++] = ',';
-    }
-    command[index - 1] = ')';
- 
-    // Ending argument list traversal
+    result = em_invoke("gradef", n + 1, _expr, ptr);
     va_end(ptr);
-
-    int result =  em_eval(command);
-    free(command);
 
     return result;
 }

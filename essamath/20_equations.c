@@ -2,8 +2,6 @@
 #include "expression.h"
 #include <stdarg.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 int em_algsys(em_object _expr, em_object _x){
     return em_invoke("algsys", 2, _expr, _x);
@@ -23,28 +21,11 @@ int em_dimension(em_object _eqn){
 
 int em_dimension_2(size_t n, ...){
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
-    memset(command, 0, size);
-    strcpy(command, "dimension");
-
-    size_t index = strlen(command);
-    command[index++] = '(';
- 
+    int result = 0;
+    
     va_start(ptr, n);
-    for (size_t i = 0; i < n; i++){
-        em_object obj = va_arg(ptr, em_object);
-        em_tostring(obj, command + index, size - index);
-        index = strlen(command);
-        command[index++] = ',';
-    }
-    command[index - 1] = ')';
- 
-    // Ending argument list traversal
+    result = em_invoke("dimension", n, ptr);
     va_end(ptr);
-
-    int result =  em_eval(command);
-    free(command);
 
     return result;
 }

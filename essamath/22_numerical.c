@@ -85,6 +85,6 @@ int em_newton(em_object _expr, em_object _x, em_object _x0, em_object _eps){
     return em_invoke("newton", 4, _expr, _x, _x0, _eps);
 }
 
-int em_rk(em_object _ODE, em_object _var, em_object _initial, em_object _domain){
-    return em_invoke("rk", 4, _ODE, _var, _initial, _domain);
+int em_rk(em_object _ode, em_object _var, em_object _initial, em_object _domain){
+    return em_invoke("rk", 4, _ode, _var, _initial, _domain);
 }

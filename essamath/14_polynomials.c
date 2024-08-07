@@ -2,8 +2,6 @@
 #include "expression.h"
 #include <stdarg.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 int em_bezout(em_object _p1, em_object _p2, em_object _x){
     return em_invoke("bezout", 3, _p1, _p2, _x);
@@ -23,28 +21,11 @@ int em_coeff_2(em_object _expr, em_object _x, em_object _n){
 
 int em_content(size_t n, ...){
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
-    memset(command, 0, size);
-    strcpy(command, "content");
-
-    size_t index = strlen(command);
-    command[index++] = '(';
- 
+    int result = 0;
+    
     va_start(ptr, n);
-    for (size_t i = 0; i < n; i++){
-        em_object obj = va_arg(ptr, em_object);
-        em_tostring(obj, command + index, size - index);
-        index = strlen(command);
-        command[index++] = ',';
-    }
-    command[index - 1] = ')';
- 
-    // Ending argument list traversal
+    result = em_invoke("content", n, ptr);
     va_end(ptr);
-
-    int result =  em_eval(command);
-    free(command);
 
     return result;
 }
@@ -55,28 +36,11 @@ int em_denom(em_object _expr){
 
 int em_divide(size_t n, ...){
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
-    memset(command, 0, size);
-    strcpy(command, "divide");
-
-    size_t index = strlen(command);
-    command[index++] = '(';
- 
+    int result = 0;
+    
     va_start(ptr, n);
-    for (size_t i = 0; i < n; i++){
-        em_object obj = va_arg(ptr, em_object);
-        em_tostring(obj, command + index, size - index);
-        index = strlen(command);
-        command[index++] = ',';
-    }
-    command[index - 1] = ')';
- 
-    // Ending argument list traversal
+    result = em_invoke("divide", n, ptr);
     va_end(ptr);
-
-    int result =  em_eval(command);
-    free(command);
 
     return result;
 }
@@ -87,28 +51,11 @@ int em_eliminate(em_object _eqn, em_object _x){
 
 int em_ezgcd(size_t n, ...){
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
-    memset(command, 0, size);
-    strcpy(command, "ezgcd");
-
-    size_t index = strlen(command);
-    command[index++] = '(';
- 
+    int result = 0;
+    
     va_start(ptr, n);
-    for (size_t i = 0; i < n; i++){
-        em_object obj = va_arg(ptr, em_object);
-        em_tostring(obj, command + index, size - index);
-        index = strlen(command);
-        command[index++] = ',';
-    }
-    command[index - 1] = ')';
- 
-    // Ending argument list traversal
+    result = em_invoke("ezgcd", n, ptr);
     va_end(ptr);
-
-    int result =  em_eval(command);
-    free(command);
 
     return result;
 }
@@ -123,31 +70,11 @@ int em_factor_2(em_object _expr, em_object _p){
 
 int em_factorout(em_object _expr, size_t n, ...){
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
-    memset(command, 0, size);
-    strcpy(command, "factorout");
-
-    size_t index = strlen(command);
-    command[index++] = '(';
-    em_tostring(_expr, command + index, size - index);
-    index = strlen(command);
-    command[index++] = ',';
- 
+    int result = 0;
+    
     va_start(ptr, n);
-    for (size_t i = 0; i < n; i++){
-        em_object obj = va_arg(ptr, em_object);
-        em_tostring(obj, command + index, size - index);
-        index = strlen(command);
-        command[index++] = ',';
-    }
-    command[index - 1] = ')';
- 
-    // Ending argument list traversal
+    result = em_invoke("factorout", n + 1, _expr, ptr);
     va_end(ptr);
-
-    int result =  em_eval(command);
-    free(command);
 
     return result;
 }
@@ -170,28 +97,11 @@ int em_fullratsubst(em_object _new, em_object _old, em_object _expr){
 
 int em_gcd(size_t n, ...){
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
-    memset(command, 0, size);
-    strcpy(command, "gcd");
-
-    size_t index = strlen(command);
-    command[index++] = '(';
- 
+    int result = 0;
+    
     va_start(ptr, n);
-    for (size_t i = 0; i < n; i++){
-        em_object obj = va_arg(ptr, em_object);
-        em_tostring(obj, command + index, size - index);
-        index = strlen(command);
-        command[index++] = ',';
-    }
-    command[index - 1] = ')';
- 
-    // Ending argument list traversal
+    result = em_invoke("gcd", n, ptr);
     va_end(ptr);
-
-    int result =  em_eval(command);
-    free(command);
 
     return result;
 }
@@ -244,48 +154,25 @@ int em_polymod_2(em_object _p, em_object _m){
     return em_invoke("polymod", 2, _p, _m);
 }
 
-int em_polynomialp(em_object _p, em_object _L, em_object _coeffp, em_object _exponp){
-    return em_invoke("polynomialp", 4, _p, _L, _coeffp, _exponp);
+int em_polynomialp(em_object _p, em_object _l, em_object _coeffp, em_object _exponp){
+    return em_invoke("polynomialp", 4, _p, _l, _coeffp, _exponp);
 }
 
-int em_polynomialp_2(em_object _p, em_object _L, em_object _coeffp){
-    return em_invoke("polynomialp", 3, _p, _L, _coeffp);
+int em_polynomialp_2(em_object _p, em_object _l, em_object _coeffp){
+    return em_invoke("polynomialp", 3, _p, _l, _coeffp);
 }
 
-int em_polynomialp_3(em_object _p, em_object _L){
-    return em_invoke("polynomialp", 2, _p, _L);
+int em_polynomialp_3(em_object _p, em_object _l){
+    return em_invoke("polynomialp", 2, _p, _l);
 }
 
 int em_quotient(em_object _p1, em_object _p2, size_t n, ...){
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
-    memset(command, 0, size);
-    strcpy(command, "quotient");
-
-    size_t index = strlen(command);
-    command[index++] = '(';
-    em_tostring(_p1, command + index, size - index);
-    index = strlen(command);
-    command[index++] = ',';
-    em_tostring(_p2, command + index, size - index);
-    index = strlen(command);
-    command[index++] = ',';
- 
+    int result = 0;
+    
     va_start(ptr, n);
-    for (size_t i = 0; i < n; i++){
-        em_object obj = va_arg(ptr, em_object);
-        em_tostring(obj, command + index, size - index);
-        index = strlen(command);
-        command[index++] = ',';
-    }
-    command[index - 1] = ')';
- 
-    // Ending argument list traversal
+    result = em_invoke("quotient", n + 2, _p1, _p2, ptr);
     va_end(ptr);
-
-    int result =  em_eval(command);
-    free(command);
 
     return result;
 }
@@ -296,31 +183,11 @@ int em_rat(em_object _expr){
 
 int em_rat_2(em_object _expr, size_t n, ...){
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
-    memset(command, 0, size);
-    strcpy(command, "rat");
-
-    size_t index = strlen(command);
-    command[index++] = '(';
-    em_tostring(_expr, command + index, size - index);
-    index = strlen(command);
-    command[index++] = ',';
- 
+    int result = 0;
+    
     va_start(ptr, n);
-    for (size_t i = 0; i < n; i++){
-        em_object obj = va_arg(ptr, em_object);
-        em_tostring(obj, command + index, size - index);
-        index = strlen(command);
-        command[index++] = ',';
-    }
-    command[index - 1] = ')';
- 
-    // Ending argument list traversal
+    result = em_invoke("rat", n + 1, _expr, ptr);
     va_end(ptr);
-
-    int result =  em_eval(command);
-    free(command);
 
     return result;
 }
@@ -363,31 +230,11 @@ int em_ratsimp(em_object _expr){
 
 int em_ratsimp_2(em_object _expr, size_t n, ...){
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
-    memset(command, 0, size);
-    strcpy(command, "ratsimp");
-
-    size_t index = strlen(command);
-    command[index++] = '(';
-    em_tostring(_expr, command + index, size - index);
-    index = strlen(command);
-    command[index++] = ',';
- 
+    int result = 0;
+    
     va_start(ptr, n);
-    for (size_t i = 0; i < n; i++){
-        em_object obj = va_arg(ptr, em_object);
-        em_tostring(obj, command + index, size - index);
-        index = strlen(command);
-        command[index++] = ',';
-    }
-    command[index - 1] = ')';
- 
-    // Ending argument list traversal
+    result = em_invoke("ratsimp", n + 1, _expr, ptr);
     va_end(ptr);
-
-    int result =  em_eval(command);
-    free(command);
 
     return result;
 }
@@ -396,66 +243,32 @@ int em_ratsubst(em_object _a, em_object _b, em_object _c){
     return em_invoke("ratsubst", 3, _a, _b, _c);
 }
 
-int em_ratvars(){
+int em_ratvars(void){
     return em_invoke("ratvars", 0);
 }
 
 int em_ratvars_2(size_t n, ...){
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
-    memset(command, 0, size);
-    strcpy(command, "ratvars");
-
-    size_t index = strlen(command);
-    command[index++] = '(';
- 
+    int result = 0;
+    
     va_start(ptr, n);
-    for (size_t i = 0; i < n; i++){
-        em_object obj = va_arg(ptr, em_object);
-        em_tostring(obj, command + index, size - index);
-        index = strlen(command);
-        command[index++] = ',';
-    }
-    command[index - 1] = ')';
- 
-    // Ending argument list traversal
+    result = em_invoke("ratvars", n, ptr);
     va_end(ptr);
-
-    int result =  em_eval(command);
-    free(command);
 
     return result;
 }
 
-int em_ratweight(){
+int em_ratweight(void){
     return em_invoke("ratweight", 0);
 }
 
 int em_ratweight_2(size_t n, ...){
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
-    memset(command, 0, size);
-    strcpy(command, "ratweight");
-
-    size_t index = strlen(command);
-    command[index++] = '(';
- 
+    int result = 0;
+    
     va_start(ptr, n);
-    for (size_t i = 0; i < n; i++){
-        em_object obj = va_arg(ptr, em_object);
-        em_tostring(obj, command + index, size - index);
-        index = strlen(command);
-        command[index++] = ',';
-    }
-    command[index - 1] = ')';
- 
-    // Ending argument list traversal
+    result = em_invoke("ratweight", n, ptr);
     va_end(ptr);
-
-    int result =  em_eval(command);
-    free(command);
 
     return result;
 }
@@ -466,34 +279,11 @@ int em_remainder(em_object _p1, em_object _p2){
 
 int em_remainder_2(em_object _p1, em_object _p2, size_t n, ...){
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
-    memset(command, 0, size);
-    strcpy(command, "remainder");
-
-    size_t index = strlen(command);
-    command[index++] = '(';
-    em_tostring(_p1, command + index, size - index);
-    index = strlen(command);
-    command[index++] = ',';
-    em_tostring(_p2, command + index, size - index);
-    index = strlen(command);
-    command[index++] = ',';
- 
+    int result = 0;
+    
     va_start(ptr, n);
-    for (size_t i = 0; i < n; i++){
-        em_object obj = va_arg(ptr, em_object);
-        em_tostring(obj, command + index, size - index);
-        index = strlen(command);
-        command[index++] = ',';
-    }
-    command[index - 1] = ')';
- 
-    // Ending argument list traversal
+    result = em_invoke("remainder", n + 2, _p1, _p2, ptr);
     va_end(ptr);
-
-    int result =  em_eval(command);
-    free(command);
 
     return result;
 }
@@ -510,34 +300,17 @@ int em_sqfr(em_object _expr){
     return em_invoke("sqfr", 1, _expr);
 }
 
-int em_tellrat(){
+int em_tellrat(void){
     return em_invoke("tellrat", 0);
 }
 
 int em_tellrat_2(size_t n, ...){
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
-    memset(command, 0, size);
-    strcpy(command, "tellrat");
-
-    size_t index = strlen(command);
-    command[index++] = '(';
- 
+    int result = 0;
+    
     va_start(ptr, n);
-    for (size_t i = 0; i < n; i++){
-        em_object obj = va_arg(ptr, em_object);
-        em_tostring(obj, command + index, size - index);
-        index = strlen(command);
-        command[index++] = ',';
-    }
-    command[index - 1] = ')';
- 
-    // Ending argument list traversal
+    result = em_invoke("tellrat", n, ptr);
     va_end(ptr);
-
-    int result =  em_eval(command);
-    free(command);
 
     return result;
 }
@@ -548,28 +321,11 @@ int em_totaldisrep(em_object _expr){
 
 int em_untellrat(size_t n, ...){
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
-    memset(command, 0, size);
-    strcpy(command, "untellrat");
-
-    size_t index = strlen(command);
-    command[index++] = '(';
- 
+    int result = 0;
+    
     va_start(ptr, n);
-    for (size_t i = 0; i < n; i++){
-        em_object obj = va_arg(ptr, em_object);
-        em_tostring(obj, command + index, size - index);
-        index = strlen(command);
-        command[index++] = ',';
-    }
-    command[index - 1] = ')';
- 
-    // Ending argument list traversal
+    result = em_invoke("untellrat", n, ptr);
     va_end(ptr);
-
-    int result =  em_eval(command);
-    free(command);
 
     return result;
 }

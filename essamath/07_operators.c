@@ -1,9 +1,5 @@
 #include "07_operators.h"
 #include "expression.h"
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 int em_infix(em_object _op){
     return em_invoke("infix", 1, _op);

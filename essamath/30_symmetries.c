@@ -1,24 +1,24 @@
 #include "30_symmetries.h"
 #include "expression.h"
 
-int em_comp2pui(em_object _n, em_object _L){
-    return em_invoke("comp2pui", 2, _n, _L);
+int em_comp2pui(em_object _n, em_object _l){
+    return em_invoke("comp2pui", 2, _n, _l);
 }
 
-int em_ele2pui(em_object _m, em_object _L){
-    return em_invoke("ele2pui", 2, _m, _L);
+int em_ele2pui(em_object _m, em_object _l){
+    return em_invoke("ele2pui", 2, _m, _l);
 }
 
-int em_ele2comp(em_object _m, em_object _L){
-    return em_invoke("ele2comp", 2, _m, _L);
+int em_ele2comp(em_object _m, em_object _l){
+    return em_invoke("ele2comp", 2, _m, _l);
 }
 
 int em_elem(em_object _ele, em_object _sym, em_object _lvar){
     return em_invoke("elem", 3, _ele, _sym, _lvar);
 }
 
-int em_mon2schur(em_object _L){
-    return em_invoke("mon2schur", 1, _L);
+int em_mon2schur(em_object _l){
+    return em_invoke("mon2schur", 1, _l);
 }
 
 int em_multi_elem(em_object _l_elem, em_object _multi_pc, em_object _l_var){
@@ -29,8 +29,8 @@ int em_multi_pui(em_object _l_elem, em_object _multi_pc, em_object _l_var){
     return em_invoke("multi_pui", 3, _l_elem, _multi_pc, _l_var);
 }
 
-int em_pui(em_object _L, em_object _sym, em_object _lvar){
-    return em_invoke("pui", 3, _L, _sym, _lvar);
+int em_pui(em_object _l, em_object _sym, em_object _lvar){
+    return em_invoke("pui", 3, _l, _sym, _lvar);
 }
 
 int em_pui2comp(em_object _n, em_object _lpui){
@@ -45,8 +45,8 @@ int em_puireduc(em_object _n, em_object _lpui){
     return em_invoke("puireduc", 2, _n, _lpui);
 }
 
-int em_schur2comp(em_object _P, em_object _l_var){
-    return em_invoke("schur2comp", 2, _P, _l_var);
+int em_schur2comp(em_object _p, em_object _l_var){
+    return em_invoke("schur2comp", 2, _p, _l_var);
 }
 
 int em_cont2part(em_object _pc, em_object _lvar){
@@ -81,16 +81,16 @@ int em_direct(em_object _p, em_object _y, em_object _f, em_object _lvar){
     return em_invoke("direct", 4, _p, _y, _f, _lvar);
 }
 
-int em_multi_orbit(em_object _P, em_object _lvar){
-    return em_invoke("multi_orbit", 2, _P, _lvar);
+int em_multi_orbit(em_object _p, em_object _lvar){
+    return em_invoke("multi_orbit", 2, _p, _lvar);
 }
 
 int em_multsym(em_object _ppart_1, em_object _ppart_2, em_object _n){
     return em_invoke("multsym", 3, _ppart_1, _ppart_2, _n);
 }
 
-int em_orbit(em_object _P, em_object _lvar){
-    return em_invoke("orbit", 2, _P, _lvar);
+int em_orbit(em_object _p, em_object _lvar){
+    return em_invoke("orbit", 2, _p, _lvar);
 }
 
 int em_pui_direct(em_object _orbite, em_object _lvar, em_object _d){
@@ -117,68 +117,68 @@ int em_treinat(em_object _part){
     return em_invoke("treinat", 1, _part);
 }
 
-int em_ele2polynome(em_object _L, em_object _z){
-    return em_invoke("ele2polynome", 2, _L, _z);
+int em_ele2polynome(em_object _l, em_object _z){
+    return em_invoke("ele2polynome", 2, _l, _z);
 }
 
-int em_polynome2ele(em_object _P, em_object _x){
-    return em_invoke("polynome2ele", 2, _P, _x);
+int em_polynome2ele(em_object _p, em_object _x){
+    return em_invoke("polynome2ele", 2, _p, _x);
 }
 
-int em_prodrac(em_object _L, em_object _k){
-    return em_invoke("prodrac", 2, _L, _k);
+int em_prodrac(em_object _l, em_object _k){
+    return em_invoke("prodrac", 2, _l, _k);
 }
 
 int em_pui2polynome(em_object _x, em_object _lpui){
     return em_invoke("pui2polynome", 2, _x, _lpui);
 }
 
-int em_somrac(em_object _L, em_object _k){
-    return em_invoke("somrac", 2, _L, _k);
+int em_somrac(em_object _l, em_object _k){
+    return em_invoke("somrac", 2, _l, _k);
 }
 
-int em_resolvante(em_object _P, em_object _x, em_object _f, em_object _xd){
-    return em_invoke("resolvante", 4, _P, _x, _f, _xd);
+int em_resolvante(em_object _p, em_object _x, em_object _f, em_object _xd){
+    return em_invoke("resolvante", 4, _p, _x, _f, _xd);
 }
 
-int em_resolvante_alternee1(em_object _P, em_object _x){
-    return em_invoke("resolvante_alternee1", 2, _P, _x);
+int em_resolvante_alternee1(em_object _p, em_object _x){
+    return em_invoke("resolvante_alternee1", 2, _p, _x);
 }
 
-int em_resolvante_bipartite(em_object _P, em_object _x){
-    return em_invoke("resolvante_bipartite", 2, _P, _x);
+int em_resolvante_bipartite(em_object _p, em_object _x){
+    return em_invoke("resolvante_bipartite", 2, _p, _x);
 }
 
-int em_resolvante_diedrale(em_object _P, em_object _x){
-    return em_invoke("resolvante_diedrale", 2, _P, _x);
+int em_resolvante_diedrale(em_object _p, em_object _x){
+    return em_invoke("resolvante_diedrale", 2, _p, _x);
 }
 
-int em_resolvante_klein(em_object _P, em_object _x){
-    return em_invoke("resolvante_klein", 2, _P, _x);
+int em_resolvante_klein(em_object _p, em_object _x){
+    return em_invoke("resolvante_klein", 2, _p, _x);
 }
 
-int em_resolvante_klein3(em_object _P, em_object _x){
-    return em_invoke("resolvante_klein3", 2, _P, _x);
+int em_resolvante_klein3(em_object _p, em_object _x){
+    return em_invoke("resolvante_klein3", 2, _p, _x);
 }
 
-int em_resolvante_produit_sym(em_object _P, em_object _x){
-    return em_invoke("resolvante_produit_sym", 2, _P, _x);
+int em_resolvante_produit_sym(em_object _p, em_object _x){
+    return em_invoke("resolvante_produit_sym", 2, _p, _x);
 }
 
-int em_resolvante_unitaire(em_object _P, em_object _Q, em_object _x){
-    return em_invoke("resolvante_unitaire", 3, _P, _Q, _x);
+int em_resolvante_unitaire(em_object _p, em_object _q, em_object _x){
+    return em_invoke("resolvante_unitaire", 3, _p, _q, _x);
 }
 
-int em_resolvante_vierer(em_object _P, em_object _x){
-    return em_invoke("resolvante_vierer", 2, _P, _x);
+int em_resolvante_vierer(em_object _p, em_object _x){
+    return em_invoke("resolvante_vierer", 2, _p, _x);
 }
 
 int em_multinomial(em_object _r, em_object _part){
     return em_invoke("multinomial", 2, _r, _part);
 }
 
-int em_permut(em_object _L){
-    return em_invoke("permut", 1, _L);
+int em_permut(em_object _l){
+    return em_invoke("permut", 1, _l);
 }
 
 int em_todd_coxeter(em_object _relations){

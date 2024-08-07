@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 int em_bashindices(em_object _expr);
-int em_lsum(em_object _expr, em_object _x, em_object _L);
+int em_lsum(em_object _expr, em_object _x, em_object _l);
 int em_intosum(em_object _expr);
 int em_product(em_object _expr, em_object _i, em_object _i0, em_object _i1);
 int em_sum(em_object _expr, em_object _i, em_object _i0, em_object _i1);
@@ -56,7 +56,7 @@ int em_poisplus(em_object _a, em_object _b);
 int em_poissimp(em_object _a);
 int em_poissubst(em_object _a, em_object _b, em_object _c);
 int em_poistimes(em_object _a, em_object _b);
-int em_poistrim();
+int em_poistrim(void);
 int em_printpois(em_object _a);
 
 #ifdef __cplusplus

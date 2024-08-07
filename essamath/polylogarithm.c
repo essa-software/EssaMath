@@ -52,6 +52,11 @@ double em_numeric_li2(double x)
    };
 
    double y = 0, r = 0, s = 1;
+   
+   double y2 = 0.0;
+   double y4 = 0.0;
+   double p  = 0.0;
+   double q  = 0.0;
 
    /* transform to [0, 1/2] */
    if (x < -1) {
@@ -59,14 +64,14 @@ double em_numeric_li2(double x)
       y = 1/(1 - x);
       r = -PI*PI/6 + l*(0.5*l - log(-x));
       s = 1;
-   } else if (x == -1) {
+   } else if (em_nearequal(x, -1, 1e-9)) {
       return -PI*PI/12;
    } else if (x < 0) {
       const double l = log1p(-x);
       y = x/(x - 1);
       r = -0.5*l*l;
       s = -1;
-   } else if (x == 0) {
+   } else if (em_nearequal(x, 0, 1e-9)) {
       return x;
    } else if (x < 0.5) {
       y = x;
@@ -76,7 +81,7 @@ double em_numeric_li2(double x)
       y = 1 - x;
       r = PI*PI/6 - log(x)*log1p(-x);
       s = -1;
-   } else if (x == 1) {
+   } else if (em_nearequal(x, 1, 1e-9)) {
       return PI*PI/6;
    } else if (x < 2) {
       const double l = log(x);
@@ -90,11 +95,11 @@ double em_numeric_li2(double x)
       s = -1;
    }
 
-   const double y2 = y*y;
-   const double y4 = y2*y2;
-   const double p = P[0] + y * P[1] + y2 * (P[2] + y * P[3]) +
-                    y4 * (P[4] + y * P[5]);
-   const double q = Q[0] + y * Q[1] + y2 * (Q[2] + y * Q[3]) +
+   y2 = y*y;
+   y4 = y2*y2;
+   p  = P[0] + y * P[1] + y2 * (P[2] + y * P[3]) +
+       y4 * (P[4] + y * P[5]);
+   q  = Q[0] + y * Q[1] + y2 * (Q[2] + y * Q[3]) +
                     y4 * (Q[4] + y * Q[5] + y2 * Q[6]);
 
    return r + s*y*p/q;
@@ -121,6 +126,13 @@ double _Complex em_numeric_cli2(double _Complex z)
 
    const double rz = creal(z);
    const double iz = cimag(z);
+   const double nz = rz*rz + iz*iz;
+   double _Complex u = 0.0, rest = 0.0;
+   double sgn = 1;
+
+   double _Complex u2 = 0.0;
+   double _Complex u4 = 0.0;
+   double _Complex sum = 0.0;
 
    /* special cases */
    if (iz == 0.0) {
@@ -131,14 +143,10 @@ double _Complex em_numeric_cli2(double _Complex z)
       return CMPLX(em_numeric_li2(rz), -PI*log(rz));
    }
 
-   const double nz = rz*rz + iz*iz;
 
    if (nz < DBL_EPSILON) {
       return z*(1.0 + 0.25*z);
    }
-
-   double _Complex u = 0.0, rest = 0.0;
-   double sgn = 1;
 
    /* transformation to |z|<1, Re(z)<=0.5 */
    if (rz <= 0.5) {
@@ -165,9 +173,9 @@ double _Complex em_numeric_cli2(double _Complex z)
       }
    }
 
-   const double _Complex u2 = u*u;
-   const double _Complex u4 = u2*u2;
-   const double _Complex sum =
+   u2 = u*u;
+   u4 = u2*u2;
+   sum =
       u +
       u2 * (bf[0] +
       u  * (bf[1] +
@@ -234,45 +242,45 @@ double em_numeric_li3(double x)
 {
    const double zeta2 = 1.6449340668482264;
    const double zeta3 = 1.2020569031595943;
+   double l = 0.0;
 
    // transformation to [-1,0] and [0,1/2]
    if (x < -1) {
-      const double l = log(-x);
+      l = log(-x);
       return li3_neg(1/x) - l*(zeta2 + 1.0/6*l*l);
-   } if (x == -1) {
+   } if (em_nearequal(x, -1, 1e-9)) {
       return -0.75*zeta3;
    } if (x < 0) {
       return li3_neg(x);
-   } if (x == 0) {
+   } if (em_nearequal(x, 0, 1e-9)) {
       return x;
    } if (x < 0.5) {
       return li3_pos(x);
    } if (x == 0.5) {
       return 0.53721319360804020;
    } if (x < 1) {
-      const double l = log(x);
+      l = log(x);
       return -li3_neg(1 - 1/x) - li3_pos(1 - x)
          + zeta3 + l*(zeta2 + l*(-0.5*log1p(-x) + 1.0/6*l));
-   } if (x == 1) {
+   } if (em_nearequal(x, 1, 1e-9)) {
       return zeta3;
    } if (x < 2) {
-      const double l = log(x);
+      l = log(x);
       return -li3_neg(1 - x) - li3_pos(1 - 1/x)
          + zeta3 + l*(zeta2 + l*(-0.5*log(x - 1) + 1.0/6*l));
    }  // x >= 2.0
-      const double l = log(x);
+      l = log(x);
       return li3_pos(1/x) + l*(2*zeta2 - 1.0/6*l*l);
-  
 }
 
-double _Complex pos_clog(double _Complex z)
+static double _Complex pos_clog(double _Complex z)
 {
    const double rz = creal(z);
    const double iz = cimag(z);
 
    if (iz == 0.0 && rz > 0.0) {
       return log(rz);
-   } else if (iz == 0.0) {
+   } if (iz == 0.0) {
       return log(-rz) + I*3.1415926535897932;
    }
 
@@ -298,34 +306,39 @@ double _Complex em_numeric_cli3(double _Complex z)
 
    const double rz  = creal(z);
    const double iz  = cimag(z);
-
-   if (iz == 0) {
-      if (rz <= 1) {
-         return CMPLX(em_numeric_li3(rz), iz);
-      } else {
-         const double l = log(rz);
-         return CMPLX(em_numeric_li3(rz), -0.5*PI*l*l);
-      }
-   }
-
    const double nz  = hypot(rz, iz);
    const double pz  = atan2(iz, rz);
    const double lnz = log(nz);
+   double _Complex u = 0.0, rest = 0.0;
 
-   if (lnz*lnz + pz*pz < 1.0) { // |log(z)| < 1
-      const double _Complex u  = lnz + pz*I; // clog(z)
-      const double _Complex u2 = u*u;
-      const double _Complex u4 = u2*u2;
-      const double _Complex u8 = u4*u4;
-      const double _Complex c0 = zeta3 + u*(zeta2 - u2/12.0);
-      const double _Complex c1 = 0.25 * (3.0 - 2.0*pos_clog(-u));
-
+   double _Complex u2 = 0.0;
+   double _Complex u4 = 0.0;
+   double _Complex u8 = 0.0;
+   double _Complex c0 = 0.0;
+   double _Complex c1 = 0.0;
       const double cs[7] = {
          -3.4722222222222222e-03, 1.1574074074074074e-05,
          -9.8418997228521038e-08, 1.1482216343327454e-09,
          -1.5815724990809166e-11, 2.4195009792525152e-13,
          -3.9828977769894877e-15
       };
+
+   if (em_nearequal(iz, 0, 1e-9)) {
+      if (rz <= 1) {
+         return CMPLX(em_numeric_li3(rz), iz);
+      }           const double l = log(rz);
+         return CMPLX(em_numeric_li3(rz), -0.5*PI*l*l);
+     
+   }
+
+   if (lnz*lnz + pz*pz < 1.0) { // |log(z)| < 1
+      u  = lnz + pz*I; // clog(z)
+      u2 = u*u;
+      u4 = u2*u2;
+      u8 = u4*u4;
+      c0 = zeta3 + u*(zeta2 - u2/12.0);
+      c1 = 0.25 * (3.0 - 2.0*pos_clog(-u));
+
 
       return
          c0 +
@@ -335,7 +348,6 @@ double _Complex em_numeric_cli3(double _Complex z)
          u8*u8*cs[6];
    }
 
-   double _Complex u = 0.0, rest = 0.0;
 
    if (nz <= 1.0) {
       u = -pos_clog(1.0 - z);
@@ -346,9 +358,9 @@ double _Complex em_numeric_cli3(double _Complex z)
       rest = -lmz*(lmz*lmz/6.0 + zeta2);
    }
 
-   const double _Complex u2 = u*u;
-   const double _Complex u4 = u2*u2;
-   const double _Complex u8 = u4*u4;
+   u2 = u*u;
+   u4 = u2*u2;
+   u8 = u4*u4;
 
    return
       rest +
@@ -467,14 +479,14 @@ double em_numeric_li4(double x)
       x = 1/x;
       rest = -7.0/4*zeta4 + l2*(-0.5*zeta2 - 1.0/24*l2);
       sgn = -1;
-   } else if (x == -1) {
+   } else if (em_nearequal(x, -1, 1e-9)) {
       return -7.0/8*zeta4;
-   } else if (x == 0) {
+   } else if (em_nearequal(x, 0, 1e-9)) {
       return x;
    } else if (x < 1) {
       rest = 0;
       sgn = 1;
-   } else if (x == 1) {
+   } else if (em_nearequal(x, 1, 1e-9)) {
       return zeta4;
    } else { // x > 1
       const double l = log(x);
@@ -517,36 +529,46 @@ double _Complex em_numeric_cli4(double _Complex z)
 
    const double rz  = creal(z);
    const double iz  = cimag(z);
-
-   if (iz == 0) {
-      if (rz <= 1) {
-         return CMPLX(em_numeric_li4(rz), iz);
-      } else {
-         const double l = log(rz);
-         return CMPLX(em_numeric_li4(rz), -1.0/6*PI*l*l*l);
-      }
-   }
-
    const double nz  = hypot(rz, iz);
    const double pz  = atan2(iz, rz);
    const double lnz = log(nz);
+   double _Complex u = 0.0; 
+   double _Complex u2 = 0.0;
+   double _Complex u4 = 0.0;
+   double _Complex u8 = 0.0;
+   double c1 = 0.0;
+   double c2 = 0.0;
+   double _Complex c3 = 0.0;
+   double c4 = 0.0;
+   const double cs[7] = {
+      -6.9444444444444444e-04, 1.6534391534391534e-06,
+      -1.0935444136502338e-08, 1.0438378493934049e-10,
+      -1.2165942300622435e-12, 1.6130006528350101e-14,
+      -2.3428810452879340e-16
+   };
+
+   double _Complex r = 0.0;
+   double sgn = 1;
+
+   if (em_nearequal(iz, 0, 1e-9)) {
+      if (rz <= 1) {
+         return CMPLX(em_numeric_li4(rz), iz);
+      }           const double l = log(rz);
+         return CMPLX(em_numeric_li4(rz), -1.0/6*PI*l*l*l);
+     
+   }
+
 
    if (lnz*lnz + pz*pz < 1.0) { // |log(z)| < 1
-      const double _Complex u = lnz + pz*I; // clog(z)
-      const double _Complex u2 = u*u;
-      const double _Complex u4 = u2*u2;
-      const double _Complex u8 = u4*u4;
-      const double c1 = 1.2020569031595943; // em_numeric_zeta(3)
-      const double c2 = 0.82246703342411322;
-      const double _Complex c3 = (11.0/6.0 - pos_clog(-u))/6.0;
-      const double c4 = -1.0/48.0;
+      u = lnz + pz*I; // clog(z)
+      u2 = u*u;
+      u4 = u2*u2;
+      u8 = u4*u4;
+      c1 = 1.2020569031595943; // em_numeric_zeta(3)
+      c2 = 0.82246703342411322;
+      c3 = (11.0/6.0 - pos_clog(-u))/6.0;
+      c4 = -1.0/48.0;
 
-      const double cs[7] = {
-         -6.9444444444444444e-04, 1.6534391534391534e-06,
-         -1.0935444136502338e-08, 1.0438378493934049e-10,
-         -1.2165942300622435e-12, 1.6130006528350101e-14,
-         -2.3428810452879340e-16
-      };
 
       return zeta4 + u2 * (c2 + u2 * c4) +
           u * (
@@ -558,8 +580,6 @@ double _Complex em_numeric_cli4(double _Complex z)
           );
    }
 
-   double _Complex u = 0.0, r = 0.0;
-   double sgn = 1;
 
    if (nz <= 1.0) {
       u = -pos_clog(1.0 - z);
@@ -572,9 +592,9 @@ double _Complex em_numeric_cli4(double _Complex z)
       sgn = -1;
    }
 
-   const double _Complex u2 = u*u;
-   const double _Complex u4 = u2*u2;
-   const double _Complex u8 = u4*u4;
+   u2 = u*u;
+   u4 = u2*u2;
+   u8 = u4*u4;
 
    return
       r + sgn * (
@@ -587,17 +607,16 @@ double _Complex em_numeric_cli4(double _Complex z)
       );
 }
 
-double inf = (__builtin_inf ());
-double PI = 3.1415926535897932;
+static double PI = 3.1415926535897932;
 
-int64_t is_finite(double _Complex z)
+static int64_t is_finite(double _Complex z)
 {
     return isfinite(creal(z)) && isfinite(cimag(z));
 }
 
  /// Series expansion of Li_n(z) in terms of powers of z.
  /// Fast convergence for large n >= 12.
- double _Complex Li_series(int64_t n, double _Complex z)
+ static double _Complex Li_series(int64_t n, double _Complex z)
 {
     double _Complex sum = 0.0, sum_old = 0.0, p = z;
     int64_t k = 0;
@@ -608,16 +627,17 @@ int64_t is_finite(double _Complex z)
         sum += p;
         p *= z*pow(((double)k)/(1.0 + (double)k), (double)n);
         if (!is_finite(p)) { break; }
-    } while (sum != sum_old && k < LONG_MAX - 2);
+    } while (!EM_NEAREQUAL_COMPLEX(sum, sum_old, EM_EPS) && k < LONG_MAX - 2);
 
     return sum;
 }
 
 /// Series expansion of Li_n(z) around z ~ 1, n > 0
-double _Complex Li_unity_pos(int64_t n, double _Complex z)
+static double _Complex Li_unity_pos(int64_t n, double _Complex z)
 {
     const double _Complex lnz = clog(z);
     const double _Complex lnz2 = lnz*lnz;
+    double _Complex old_sum = 0.0;
     double _Complex sum = em_numeric_zeta(n), p = 1.0;
 
     for (int64_t j = 1; j < n - 1; ++j) {
@@ -636,26 +656,30 @@ double _Complex Li_unity_pos(int64_t n, double _Complex z)
 
     for (int64_t j = (n + 3); j < LONG_MAX - 2; j += 2) {
         p *= lnz2/(double)((j - 1)*j);
-        const double _Complex old_sum = sum;
+        old_sum = sum;
         sum += em_numeric_zeta(n - j)*p;
-        if (sum == old_sum) { break; }
+        if EM_NEAREQUAL_COMPLEX(sum, old_sum, EM_EPS) { break; }
     }
 
     return sum;
 }
 
    /// returns z^n, treating Re(z) == 0 and Im(z) == 0 in a stable way
-double _Complex stable_pow(double _Complex z, int64_t n)
+static double _Complex stable_pow(double _Complex z, int64_t n)
 {
     if (cimag(z) == 0) {
         return pow(creal(z), (double)n);
-    } else if (creal(z) == 0) {
+    } 
+    
+    if (creal(z) == 0) {
         const double p = pow(cimag(z), (double)n);
         if (n % 4 == 0) {
             return p;
-        } else if (n % 2 == 0) {
+        } 
+        if (n % 2 == 0) {
             return -p;
-        } else if ((n - 1) % 4 == 0) {
+        } 
+        if ((n - 1) % 4 == 0) {
             return p * I;
         }
         return -p * I;
@@ -664,7 +688,7 @@ double _Complex stable_pow(double _Complex z, int64_t n)
 }
 
    /// Series expansion of Li_n(z) around z ~ 1, n < 0
-double _Complex Li_unity_neg(int64_t n, double _Complex z)
+static double _Complex Li_unity_neg(int64_t n, double _Complex z)
 {
     double _Complex lnz = clog(z);
     double _Complex lnz2 = lnz*lnz;
@@ -685,90 +709,96 @@ double _Complex Li_unity_neg(int64_t n, double _Complex z)
          em_val fact;
          em_numeric_factorial(&fact, em_createreal((double)k));
 
-        term = em_numeric_zeta(n - k)/em_getdouble(fact)*lnzk;
+        term = em_numeric_zeta(n - k)/em_getdouble(&fact)*lnzk;
         if (!is_finite(term)) { break; }
         sum_old = sum;
         sum += term;
         lnzk *= lnz2;
         k += 2;
-    } while (sum != sum_old);
+    } while (!EM_NEAREQUAL_COMPLEX(sum, sum_old, EM_EPS));
 
     return sum;
 }
 
 /// returns rem_numericainder from inversion formula
-double _Complex Li_rest(int64_t n, double _Complex z)
+static double _Complex Li_rest(int64_t n, double _Complex z)
 {
     double _Complex lnz = clog(-z);
     double _Complex lnz2 = lnz*lnz;
     const int64_t kmax = em_numeric_iseven(n) ? n/2 : (n - 1)/2;
     double _Complex p = em_numeric_iseven(n) ? 1.0 : lnz;
-    double _Complex sum = 0, old_sum;
+    double _Complex sum = 0, old_sum = 0.0;
+    double ifac = 0.0;
+    em_val fact;
 
     for (int64_t k = kmax; k != 0; --k) {
-         em_val fact;
          em_numeric_factorial(&fact, em_createreal((double)n - 2*(double)k));
 
-        const double ifac = 1/em_getdouble(fact);
-        if (ifac == 0) { return 2.0*sum; }
+        ifac = 1/em_getdouble(&fact);
+        if (em_nearequal(ifac, 0, 1e-9)) { return 2.0*sum; }
         sum += em_numeric_neg_eta(2*k)*ifac*p;
         p *= lnz2;
-        if (sum == old_sum) { break; }
+        if (EM_NEAREQUAL_COMPLEX(sum, old_sum, EM_EPS)) { break; }
     }
 
-    em_val fact;
     em_numeric_factorial(&fact, em_createreal((double)n));
 
-    return 2.0*sum - p/em_getdouble(fact);
+    return 2.0*sum - p/em_getdouble(&fact);
 }
 
-double norm(double _Complex z){
+static double norm(double _Complex z){
     return creal(z) * creal(z) + cimag(z) * cimag(z);
 }
 
+// NOLINTBEGIN(misc-no-recursion)
 double _Complex em_numeric_li(int64_t n, double _Complex z)
 {
+   double _Complex sqrtz = 0.0;
+   double nz = 0.0;
+   double nl = 0.0;
+   
    if (isnan(creal(z)) || isnan(cimag(z))) {
       return __builtin_nan("");
-   } else if (isinf(creal(z)) || isinf(cimag(z))) {
+   } if (isinf(creal(z)) || isinf(cimag(z))) {
       return -__builtin_inf();
-   } else if (z == 0.0) {
+   } if (z == 0.0) {
       return z;
-   } else if (z == 1.0) {
+   } if (z == 1.0) {
       if (n <= 0) {
          return __builtin_inf() + __builtin_inf() * I;
       }
       return em_numeric_zeta(n) + cimag(z) * I;
-   } else if (z == -1.0) {
+   } if (EM_NEAREQUAL_COMPLEX(z, -1.0, 1e-9)) {
       return em_numeric_neg_eta(n) + cimag(z) * I;
-   } else if (n < -1) {
+   } if (n < -1) {
       // arXiv:2010.09860
-      const double nz = norm(z);
-      const double nl = norm(clog(z));
+      nz = norm(z);
+      nl = norm(clog(z));
       if (4*PI*PI*nz < nl) {
          return Li_series(n, z);
-      } else if (nl < 0.512*0.512*4*PI*PI) {
+      } if (nl < 0.512*0.512*4*PI*PI) {
          return Li_unity_neg(n, z);
       }
-      const double _Complex sqrtz = csqrt(z);
+      sqrtz = csqrt(z);
       return exp2((double)n - 1)*(em_numeric_li(n, sqrtz) + em_numeric_li(n, -sqrtz));
-   } else if (n == -1) {
+   } if (n == -1) {
       return z/((1.0 - z)*(1.0 - z));
-   } else if (n == 0) {
+   } if (n == 0) {
       return z/(1.0 - z);
-   } else if (n == 1) {
+   } if (n == 1) {
       return -clog(1.0 - z);
-   } else if (n == 2) {
+   } if (n == 2) {
       return em_numeric_li2((double)z);
-   } else if (n == 3) {
+   } if (n == 3) {
       return em_numeric_li3((double)z);
-   } else if (n == 4) {
+   } if (n == 4) {
       return em_numeric_li4((double)z);
-   } else if (norm(z) <= 0.75*0.75) {
+   } if (norm(z) <= 0.75*0.75) {
       return Li_series(n, z);
-   } else if (norm(z) >= 1.4*1.4) {
+   } if (norm(z) >= 1.4*1.4) {
       const double sgn = em_numeric_iseven(n) ? -1.0 : 1.0;
       return sgn*Li_series(n, 1.0/z) + Li_rest(n, z);
    }
    return Li_unity_pos(n, z);
 }
+// NOLINTEND(misc-no-recursion)

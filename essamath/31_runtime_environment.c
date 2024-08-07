@@ -2,8 +2,6 @@
 #include "expression.h"
 #include <stdarg.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 int em_sstatus(em_object _keyword, em_object _item){
     return em_invoke("sstatus", 2, _keyword, _item);
@@ -23,46 +21,29 @@ int em_system(em_object _command){
 
 int em_time(size_t n, ...){
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
-    memset(command, 0, size);
-    strcpy(command, "time");
-
-    size_t index = strlen(command);
-    command[index++] = '(';
- 
+    int result = 0;
+    
     va_start(ptr, n);
-    for (size_t i = 0; i < n; i++){
-        em_object obj = va_arg(ptr, em_object);
-        em_tostring(obj, command + index, size - index);
-        index = strlen(command);
-        command[index++] = ',';
-    }
-    command[index - 1] = ')';
- 
-    // Ending argument list traversal
+    result = em_invoke("time", n, ptr);
     va_end(ptr);
-
-    int result =  em_eval(command);
-    free(command);
 
     return result;
 }
 
-int em_timedate(){
+int em_timedate(void){
     return em_invoke("timedate", 0);
 }
 
-int em_timedate_2(em_object _T){
-    return em_invoke("timedate", 1, _T);
+int em_timedate_2(em_object _t){
+    return em_invoke("timedate", 1, _t);
 }
 
-int em_timedate_3(em_object _T, em_object _tz_offset){
-    return em_invoke("timedate", 2, _T, _tz_offset);
+int em_timedate_3(em_object _t, em_object _tz_offset){
+    return em_invoke("timedate", 2, _t, _tz_offset);
 }
 
-int em_parse_timedate(em_object _S){
-    return em_invoke("parse_timedate", 1, _S);
+int em_parse_timedate(em_object _s){
+    return em_invoke("parse_timedate", 1, _s);
 }
 
 int em_encode_time(em_object _year, em_object _month, em_object _day, em_object _hours, em_object _minutes, em_object _seconds){
@@ -73,27 +54,27 @@ int em_encode_time_2(em_object _year, em_object _month, em_object _day, em_objec
     return em_invoke("encode_time", 7, _year, _month, _day, _hours, _minutes, _seconds, _tz_offset);
 }
 
-int em_decode_time(em_object _T){
-    return em_invoke("decode_time", 1, _T);
+int em_decode_time(em_object _t){
+    return em_invoke("decode_time", 1, _t);
 }
 
-int em_decode_time_2(em_object _T, em_object _tz_offset){
-    return em_invoke("decode_time", 2, _T, _tz_offset);
+int em_decode_time_2(em_object _t, em_object _tz_offset){
+    return em_invoke("decode_time", 2, _t, _tz_offset);
 }
 
-int em_absolute_real_time(){
+int em_absolute_real_time(void){
     return em_invoke("absolute_real_time", 0);
 }
 
-int em_elapsed_real_time(){
+int em_elapsed_real_time(void){
     return em_invoke("elapsed_real_time", 0);
 }
 
-int em_elapsed_run_time(){
+int em_elapsed_run_time(void){
     return em_invoke("elapsed_run_time", 0);
 }
 
-int em_gensym(){
+int em_gensym(void){
     return em_invoke("gensym", 0);
 }
 
@@ -103,33 +84,16 @@ int em_gensym_2(em_object _x){
 
 int em_remvalue(size_t n, ...){
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
-    memset(command, 0, size);
-    strcpy(command, "remvalue");
-
-    size_t index = strlen(command);
-    command[index++] = '(';
- 
+    int result = 0;
+    
     va_start(ptr, n);
-    for (size_t i = 0; i < n; i++){
-        em_object obj = va_arg(ptr, em_object);
-        em_tostring(obj, command + index, size - index);
-        index = strlen(command);
-        command[index++] = ',';
-    }
-    command[index - 1] = ')';
- 
-    // Ending argument list traversal
+    result = em_invoke("remvalue", n, ptr);
     va_end(ptr);
-
-    int result =  em_eval(command);
-    free(command);
 
     return result;
 }
 
-int em_remvalueall(){
+int em_remvalueall(void){
     return em_invoke("remvalueall", 1, em_createstring("all"));
 }
 
@@ -139,31 +103,11 @@ int em_rncombine(em_object _expr){
 
 int em_setup_autoload(em_object _filename, size_t n, ...){
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
-    memset(command, 0, size);
-    strcpy(command, "setup_autoload");
-
-    size_t index = strlen(command);
-    command[index++] = '(';
-    em_tostring(_filename, command + index, size - index);
-    index = strlen(command);
-    command[index++] = ',';
- 
+    int result = 0;
+    
     va_start(ptr, n);
-    for (size_t i = 0; i < n; i++){
-        em_object obj = va_arg(ptr, em_object);
-        em_tostring(obj, command + index, size - index);
-        index = strlen(command);
-        command[index++] = ',';
-    }
-    command[index - 1] = ')';
- 
-    // Ending argument list traversal
+    result = em_invoke("remarray", n + 1, _filename, ptr);
     va_end(ptr);
-
-    int result =  em_eval(command);
-    free(command);
 
     return result;
 }

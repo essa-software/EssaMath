@@ -6,8 +6,11 @@
 #include <ecl/ecl.h>
 #include <ecl/external.h>
 #include <math.h>
+#include <printf.h>
 #include <stdlib.h>
 #include <string.h>
+
+// NOLINTBEGIN(misc-no-recursion)
 
 int em_eval(const char* _expr){
     cl_env_ptr l_env = ecl_process_env();
@@ -17,7 +20,8 @@ int em_eval(const char* _expr){
         cl_eval(c_string_to_object("(setq *maxima-started* nil)"));
         sprintf(buf, "(handler-case (catch 'macsyma-quit (macsyma-top-level (make-string-input-stream \"%s$\") :batch) ) )", _expr);
         cl_eval(c_string_to_object(buf));
-	} ECL_HANDLER_CASE(1, condition) {
+	} } else if (__the_env->values[0] == ecl_make_fixnum(1)) {
+        [[maybe_unused]] const cl_object args = __the_env->values[1]; {
         return EM_RTERROR;
 	} ECL_HANDLER_CASE_END;
 
@@ -27,19 +31,20 @@ int em_eval(const char* _expr){
 int em_invoke(const char* _funcname, size_t n, ...){
 
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
+    size_t index = 0;
+    char command[1024] = {0};
+    int result = 0;
 
     strcpy(command, _funcname);
 
-    size_t index = strlen(command);
+    index = strlen(command);
     command[index++] = '(';
  
     va_start(ptr, n);
     for (size_t i = 0; i < n; i++){
         em_object obj = va_arg(ptr, em_object);
         printf("%zx\n", (size_t)obj);
-        em_tostring(obj, command + index, size - index);
+        em_printexpr(obj, command + index, 1024 - index);
         index = strlen(command);
         command[index++] = ',';
     }
@@ -49,13 +54,18 @@ int em_invoke(const char* _funcname, size_t n, ...){
     // Ending argument list traversal
     va_end(ptr);
 
-    int result =  em_eval(command);
-    free(command);
+    result =  em_eval(command);
 
     return result;
 }
 
-em_object em_parse_from_string(const char* _buf, size_t _begin, size_t _end){
+static em_object em_parse_from_string(const char* _buf, size_t _begin, size_t _end){
+    em_object result = NULL;
+    em_object current = NULL;
+    em_object obj = NULL;
+    size_t depthBrackets = 0, depthQuotes = 0, begin = _begin;
+    char* str = NULL;
+
     for(; _begin < _end; _begin++){
         if(!isspace(_buf[_begin])) {
             break;
@@ -66,15 +76,14 @@ em_object em_parse_from_string(const char* _buf, size_t _begin, size_t _end){
             break;
         }
     }
-    em_object result = (em_object)malloc(sizeof(struct EmList));
+    result = (em_object)malloc(sizeof(struct EmList));
 
     if(_buf[_begin] == '(' && _buf[_end - 1] == ')'){
         _begin++; _end--;
-        em_object current = result;
+        current = result;
         current->emType = EM_LIST;
         current->emVal.emList = NULL;
-        size_t depthBrackets = 0, depthQuotes = 0;
-        size_t begin = _begin;
+        begin = _begin;
         for(size_t i = _begin; i < _end; i++){
             if(_buf[i] == '('){
                 depthBrackets++;
@@ -95,7 +104,7 @@ em_object em_parse_from_string(const char* _buf, size_t _begin, size_t _end){
             }
 
             if(isspace(_buf[i])){
-                em_object obj = em_parse_from_string(_buf, begin, i);
+                obj = em_parse_from_string(_buf, begin, i);
                 if(!current->emVal.emList){
                     current->emVal.emList = obj;
                     current = obj;
@@ -108,7 +117,7 @@ em_object em_parse_from_string(const char* _buf, size_t _begin, size_t _end){
             }
         }
 
-        em_object obj = em_parse_from_string(_buf, begin, _end);
+        obj = em_parse_from_string(_buf, begin, _end);
         if(!current->emVal.emList){
             current->emVal.emList = obj;
             current = obj;
@@ -132,7 +141,7 @@ em_object em_parse_from_string(const char* _buf, size_t _begin, size_t _end){
             }
         }
 
-        char* str = (char*)malloc(_end - _begin + 1);
+        str = (char*)malloc(_end - _begin + 1);
         strncpy(str, _buf + _begin, _end - _begin);
         str[_end - _begin] = 0;
         if(isnum){
@@ -151,6 +160,7 @@ em_object em_parse_from_string(const char* _buf, size_t _begin, size_t _end){
 em_object em_parse(cl_object _list){
     char* buf = (char*)malloc(_list->string.dim);
     char* test = (char*)malloc(_list->string.dim);
+    em_object result = NULL;
     
     size_t index = 0;
     int ommitwhitespace = 0;
@@ -170,43 +180,76 @@ em_object em_parse(cl_object _list){
     }
     // printf("%s\n", test);
     buf[index] = 0;
-    em_object result =  em_parse_from_string(buf, 0, index);
+    result =  em_parse_from_string(buf, 0, index);
     
     free(buf);
     free(test);
     return result;
 }
 
-void em_printf(em_object _toprint){
-    em_object current = _toprint;
-    while(current){
-        switch(current->emType){
-            case EM_NUMBER:
-                printf("%g", current->emVal.emNumber);
-            break;
-            case EM_STRING:
-                printf("%s", current->emVal.emString);
-            break;
-            case EM_LIST:
-                printf("(");
-                em_printf(current->emVal.emList);
-                printf(")");
-            break;
+void em_printlist(char* _buf, size_t _buf_size, const em_object _toprint) {
+    const em_object current = _toprint;
+    size_t index = strlen(_buf);
+    
+    while (current && index < _buf_size) {
+        switch (current->emType) {
+            case EM_NUMBER: {
+                int written = snprintf(_buf + index, _buf_size - index, "%g", current->emVal.emNumber);
+                if (written < 0 || (size_t)written >= _buf_size - index) {
+                    // Handle error or truncation
+                    return;
+                }
+                index += written;
+                break;
+            }
+            case EM_STRING: {
+                int written = snprintf(_buf + index, _buf_size - index, "%s", current->emVal.emString);
+                if (written < 0 || (size_t)written >= _buf_size - index) {
+                    // Handle error or truncation
+                    return;
+                }
+                index += written;
+                break;
+            }
+            case EM_LIST: {
+                if (index < _buf_size - 1) {
+                    _buf[index++] = '(';
+                    em_printlist(_buf + index, _buf_size - index, current->emVal.emList);
+                    index = strlen(_buf);
+                    if (index < _buf_size - 1) {
+                        _buf[index++] = ')';
+                    } else {
+                        // Handle truncation
+                        return;
+                    }
+                } else {
+                    // Handle truncation
+                    return;
+                }
+                break;
+            }
             default:
-            break;
-        } 
-        current = current->emNext;
-        if(current){
-            printf(" ");
+                break;
         }
+        current = current->emNext;
+        if (current && index < _buf_size - 1) {
+            _buf[index++] = ' ';
+        }
+    }
+    if (index < _buf_size) {
+        _buf[index] = '\0';
+    } else {
+        _buf[_buf_size - 1] = '\0';
     }
 }
 
 em_object em_clonelist(em_object _other){
+    em_object current = NULL;
+
     if(_other == NULL){
         return NULL;
     }
-    em_object current = (em_object)malloc(sizeof(struct EmList));
+    current = (em_object)malloc(sizeof(struct EmList));
 
     switch(_other->emType){
         case EM_NUMBER:
@@ -229,7 +272,7 @@ em_object em_clonelist(em_object _other){
     return current;
 }
 
-void append_to_buffer(char* buf, size_t* buf_pos, size_t buf_size, const char* str) {
+static void append_to_buffer(char* buf, size_t* buf_pos, size_t buf_size, const char* str) {
     size_t len = strlen(str);
     if (*buf_pos + len < buf_size) {
         strcpy(&buf[*buf_pos], str);
@@ -239,8 +282,8 @@ void append_to_buffer(char* buf, size_t* buf_pos, size_t buf_size, const char* s
     }
 }
 
-void em_tostring_helper(em_object _current, char* _buf, size_t _size, size_t* _buf_pos, int _significance);
-void em_append_operator(em_object _list, char* _buf, size_t _size, size_t* _buf_pos, int _significance, int _operatormode, const char* _lbracket, const char* _rbracket, const char* _separator){
+static void em_tostring_helper(const em_object _current, char* _buf, size_t _size, size_t* _buf_pos, int _significance);
+static void em_append_operator(const em_object _list, char* _buf, size_t _size, size_t* _buf_pos, int _significance, const char* _lbracket, const char* _rbracket, const char* _separator, int _operatormode){
     append_to_buffer(_buf, _buf_pos, _size, _lbracket);
     while (_list != NULL) {
         if (_operatormode == 0) { 
@@ -255,7 +298,7 @@ void em_append_operator(em_object _list, char* _buf, size_t _size, size_t* _buf_
     append_to_buffer(_buf, _buf_pos, _size, _rbracket);
 }
 
-void em_tostring_helper(em_object _current, char* _buf, size_t _size, size_t* _buf_pos, int _significance) {
+static void em_tostring_helper(const em_object _current, char* _buf, size_t _size, size_t* _buf_pos, int _significance) {
     if (_current == NULL) { return; }
 
     switch (_current->emType) {
@@ -283,63 +326,117 @@ void em_tostring_helper(em_object _current, char* _buf, size_t _size, size_t* _b
                 em_object name = list->emVal.emList;
                 list = list->emNext;
                 if (name != NULL && name->emType == EM_STRING) {
-                    if (strcmp(name->emVal.emString, "mplus") == 0) {
+                    if (strcmp(name->emVal.emString, "mequal") == 0) {
                         if(_significance > 1){
-                            em_append_operator(list, _buf, _size, _buf_pos, 1, 1, "(", ")", "+");
+                            em_append_operator(list, _buf, _size, _buf_pos, 0, "(", ")", "=", 1);
                         }else{
-                            em_append_operator(list, _buf, _size, _buf_pos, 1, 1, "", "", "+");
+                            em_append_operator(list, _buf, _size, _buf_pos, 0, "", "", "=", 1);
+                        }
+                    } else if (strcmp(name->emVal.emString, "mnotequal") == 0) {
+                        if(_significance > 1){
+                            em_append_operator(list, _buf, _size, _buf_pos, 0, "(", ")", "#", 1);
+                        }else{
+                            em_append_operator(list, _buf, _size, _buf_pos, 0, "", "", "#", 1);
+                        }
+                    } else if (strcmp(name->emVal.emString, "mgreaterp") == 0) {
+                        if(_significance > 1){
+                            em_append_operator(list, _buf, _size, _buf_pos, 0, "(", ")", ">", 1);
+                        }else{
+                            em_append_operator(list, _buf, _size, _buf_pos, 0, "", "", ">", 1);
+                        }
+                    } else if (strcmp(name->emVal.emString, "mgeqp") == 0) {
+                        if(_significance > 1){
+                            em_append_operator(list, _buf, _size, _buf_pos, 0, "(", ")", ">=", 1);
+                        }else{
+                            em_append_operator(list, _buf, _size, _buf_pos, 0, "", "", ">=", 1);
+                        }
+                    } else if (strcmp(name->emVal.emString, "mlessp") == 0) {
+                        if(_significance > 1){
+                            em_append_operator(list, _buf, _size, _buf_pos, 0, "(", ")", "<", 1);
+                        }else{
+                            em_append_operator(list, _buf, _size, _buf_pos, 0, "", "", "<", 1);
+                        }
+                    } else if (strcmp(name->emVal.emString, "mleqp") == 0) {
+                        if(_significance > 1){
+                            em_append_operator(list, _buf, _size, _buf_pos, 0, "(", ")", "<=", 1);
+                        }else{
+                            em_append_operator(list, _buf, _size, _buf_pos, 0, "", "", "<=", 1);
+                        }
+                    } else if (strcmp(name->emVal.emString, "mplus") == 0) {
+                        if(_significance > 1){
+                            em_append_operator(list, _buf, _size, _buf_pos, 1, "(", ")", "+", 1);
+                        }else{
+                            em_append_operator(list, _buf, _size, _buf_pos, 1, "", "", "+", 1);
                         }
                     } else if (strcmp(name->emVal.emString, "mminus") == 0) {
                         if(_significance > 1){
-                            em_append_operator(list, _buf, _size, _buf_pos, 1, 0, "(", ")", "-");
+                            em_append_operator(list, _buf, _size, _buf_pos, 1, "(", ")", "-", 0);
                         }else{
-                            em_append_operator(list, _buf, _size, _buf_pos, 1, 0, "", "", "-");
+                            em_append_operator(list, _buf, _size, _buf_pos, 1, "", "", "-", 0);
                         }
                     } else if (strcmp(name->emVal.emString, "mtimes") == 0) {
                         if(_significance > 2){
-                            em_append_operator(list, _buf, _size, _buf_pos, 2, 1, "(", ")", "*");
+                            em_append_operator(list, _buf, _size, _buf_pos, 2, "(", ")", "*", 1);
                         }else{
-                            em_append_operator(list, _buf, _size, _buf_pos, 2, 1, "", "", "*");
+                            em_append_operator(list, _buf, _size, _buf_pos, 2, "", "", "*", 1);
                         }
-                    } else if (strcmp(name->emVal.emString, "mrat") == 0 || strcmp(name->emVal.emString, "mquotient") == 0) {
+                    } else if (strcmp(name->emVal.emString, "rat") == 0 || strcmp(name->emVal.emString, "mquotient") == 0) {
                         if(_significance > 2){
-                            em_append_operator(list, _buf, _size, _buf_pos, 2, 1, "(", ")", "/");
+                            em_append_operator(list, _buf, _size, _buf_pos, 2, "(", ")", "/", 1);
                         }else{
-                            em_append_operator(list, _buf, _size, _buf_pos, 2, 1, "", "", "/");
+                            em_append_operator(list, _buf, _size, _buf_pos, 2, "", "", "/", 1);
                         }
                     } else if (strcmp(name->emVal.emString, "mexpt") == 0) {
                         if(_significance > 3){
-                            em_append_operator(list, _buf, _size, _buf_pos, 3, 1, "(", ")", "^");
+                            em_append_operator(list, _buf, _size, _buf_pos, 3, "(", ")", "^", 1);
                         }else{
-                            em_append_operator(list, _buf, _size, _buf_pos, 3, 1, "", "", "^");
+                            em_append_operator(list, _buf, _size, _buf_pos, 3, "", "", "^", 1);
                         }
                     } else if (strcmp(name->emVal.emString, "mfactorial") == 0) {
                         if(_significance > 4){
-                            em_append_operator(list, _buf, _size, _buf_pos, 4, 2, "(", ")", "!");
+                            em_append_operator(list, _buf, _size, _buf_pos, 4, "(", ")", "!", 1);
                         }else{
-                            em_append_operator(list, _buf, _size, _buf_pos, 4, 2, "", "", "!");
+                            em_append_operator(list, _buf, _size, _buf_pos, 4, "", "", "!", 1);
                         }
                     } else if (strcmp(name->emVal.emString, "mlist") == 0) {
-                       em_append_operator(list, _buf, _size, _buf_pos, 0, 1, "[", "]", ",");
+                       em_append_operator(list, _buf, _size, _buf_pos, 0, "[", "]", ",", 1);
                     } else {
                         if (name->emVal.emString[0] == '%') {
                             append_to_buffer(_buf, _buf_pos, _size, &name->emVal.emString[1]);
                         } else {
                             append_to_buffer(_buf, _buf_pos, _size, name->emVal.emString);
                         }
-                       em_append_operator(list, _buf, _size, _buf_pos, 0, 1, "(", ")", ",");
+                       em_append_operator(list, _buf, _size, _buf_pos, 0, "(", ")", ",", 1);
                     }
                 }
                 break;
             }
         }
+        break; 
         default:
         break;
     }
 }
 
-_Complex double em_complex(double _real, double _imag){
-    return _real + (double)I * _imag;
+em_val em_real(double _real){
+    return em_createreal(_real);
+}
+
+em_val em_complex(double _real, double _imag){
+    return em_createcomplex(_real + I * _imag);
+}
+
+em_val em_vector(size_t n, ...){
+    em_val* arr = (em_val*)malloc(n * sizeof(em_val));
+
+    va_list ptr;
+    va_start(ptr, n);
+    for (size_t i = 0; i < n; i++){
+        arr[i] = va_arg(ptr, em_val);
+    }
+    va_end(ptr);
+
+    return em_createvector(arr, n);
 }
 
 struct EmNumericValue em_createreal(double _number){
@@ -367,66 +464,110 @@ struct EmNumericValue em_createvector(em_val* _number, size_t _size){
     return result;
 }
 
-// struct EmNumericValue em_creatematrix(em_val** _number, size_t _rows, size_t _cols){
-//     struct EmNumericValue result;
-//     result.emType = EM_VALMATRIX;
-//     result.emValue.emMatrix.emData = _number;
-//     result.emValue.emMatrix.EmRows = _rows;
-//     result.emValue.emMatrix.EmCols = _cols;
-
-//     return result;
-// }
-
-double em_getdouble(em_val _value){
-    switch (_value.emType) {
+double em_getdouble(const em_val* _value){
+    switch (_value->emType) {
         case EM_VALREAL:
-            return _value.emValue.emReal;
+            return _value->emValue.emReal;
         case EM_VALCOMPLEX:{
-            if(cimag(_value.emValue.emComplex) != 0){
+            if(cimag(_value->emValue.emComplex) != 0){
                 return __builtin_nan("");
             }
 
-            return creal(_value.emValue.emComplex);
+            return creal(_value->emValue.emComplex);
         }
         default:
             return __builtin_nan("");
     }
 }
 
-_Complex double em_getcomplex(em_val _value){
-    switch (_value.emType) {
+_Complex double em_getcomplex(const em_val* _value){
+    switch (_value->emType) {
         case EM_VALREAL:
-            return _value.emValue.emReal;
+            return _value->emValue.emReal;
         case EM_VALCOMPLEX:
-            return _value.emValue.emComplex;
+            return _value->emValue.emComplex;
         default:
             return __builtin_nan("");
     }
 }
 
-size_t em_getvectorsize(em_val _value){
-    switch (_value.emType) {
+size_t em_getvectorsize(const em_val* _value){
+    switch (_value->emType) {
         case EM_VALVECTOR:
-            return _value.emValue.emVector.emSize;
+            return _value->emValue.emVector.emSize;
         default:
             return 0;
     }
 }
 
-em_val* em_getvectordata(em_val _value){
-    switch (_value.emType) {
+const em_val* em_getvectordata(const em_val* _value){
+    switch (_value->emType) {
         case EM_VALVECTOR:
-            return _value.emValue.emVector.emData;
+            return _value->emValue.emVector.emData;
         default:
             return NULL;
     }
 }
 
 
-void em_tostring(em_object _current, char* _buf, size_t _size) {
+void em_printexpr(const em_object _current, char* _buf, size_t _size) {
     size_t buf_pos = 0;
     em_tostring_helper(_current, _buf, _size, &buf_pos, 0);
     _buf[buf_pos] = '\0';  // Null-terminate the string
+}
+
+void em_printval(const em_val* _toprint, char* _buf, size_t _buf_size) {
+    size_t index = strlen(_buf);
+    switch (_toprint->emType) {
+        case EM_VALREAL: {
+            int written = snprintf(_buf + index, _buf_size - index, "%g", _toprint->emValue.emReal);
+            if (written < 0 || (size_t)written >= _buf_size - index) {
+                // Handle error or truncation
+                return;
+            }
+            index += written;
+            break;
+        }
+        case EM_VALCOMPLEX: {
+            int written = 0;
+            if (cimag(_toprint->emValue.emComplex) > 0) {
+                written = snprintf(_buf + index, _buf_size - index, "%g+%g*%%i", creal(_toprint->emValue.emComplex), cimag(_toprint->emValue.emComplex));
+            } else if (cimag(_toprint->emValue.emComplex) < 0) {
+                written = snprintf(_buf + index, _buf_size - index, "%g-%g*%%i", creal(_toprint->emValue.emComplex), fabs(cimag(_toprint->emValue.emComplex)));
+            } else {
+                written = snprintf(_buf + index, _buf_size - index, "%g", creal(_toprint->emValue.emComplex));
+            }
+            if (written < 0 || (size_t)written >= _buf_size - index) {
+                // Handle error or truncation
+                return;
+            }
+            index += written;
+            break;
+        }
+        case EM_VALVECTOR: {
+            if (index < _buf_size - 1) {
+                _buf[index++] = '[';
+                for (size_t i = 0; i < _toprint->emValue.emVector.emSize; i++) {
+                    em_printval(_toprint->emValue.emVector.emData + i, _buf + index, _buf_size - index);
+                    index = strlen(_buf);
+                    if (i < _toprint->emValue.emVector.emSize - 1 && index < _buf_size - 1) {
+                        _buf[index++] = ',';
+                    }
+                }
+                if (index < _buf_size - 1) {
+                    _buf[index++] = ']';
+                }
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    if (index < _buf_size) {
+        _buf[index] = '\0';
+    } else {
+        _buf[_buf_size - 1] = '\0';
+    }
 }
 
 void em_rellist(em_object _tofree){
@@ -448,6 +589,10 @@ void em_rellist(em_object _tofree){
 }
 
 em_object em_getexpr(em_object _identifier){
+    char buf[2048] = {0};
+    char id[256] = {0};
+    cl_object obj;
+
     if(!_identifier){
         return NULL;
     }
@@ -456,20 +601,28 @@ em_object em_getexpr(em_object _identifier){
         return NULL;
     }
 
-    char buf[2048] = {0};
-    char id[256] = {0};
-    em_tostring(_identifier, id, 256);
+    em_printexpr(_identifier, id, 256);
     sprintf(buf, "(api-eval \"%s$\")", id);
-    cl_object obj = cl_eval(c_string_to_object(buf));
+    obj = cl_eval(c_string_to_object(buf));
 
     return em_parse(obj);
 }
 
+int em_nearequal(double _lhs, double _rhs, double _eps){
+    double diff = fabs(_lhs - _rhs);
 
-struct EmValueNode* em_createexpression_helper(em_object _current, size_t _varcount, const char** _varlist, em_val** _vardata) {
+    double largest = fmax(fabs(_lhs), fabs(_rhs));
+
+    double dynamic_epsilon = _eps * largest;
+
+    return diff <= dynamic_epsilon;
+}
+
+static struct EmValueNode* em_createexpression_helper(em_object _current, size_t _varcount, const char** _varlist, em_val** _vardata) {
+    struct EmValueNode* result = NULL;
     if (_current == NULL) { return NULL;}
 
-    struct EmValueNode* result = (struct EmValueNode*)malloc(sizeof(struct EmValueNode));
+    result = (struct EmValueNode*)malloc(sizeof(struct EmValueNode));
 
     switch (_current->emType) {
         case EM_NUMBER: {
@@ -496,7 +649,7 @@ struct EmValueNode* em_createexpression_helper(em_object _current, size_t _varco
                         result->emVal.emNumber = em_numeric_inf();
                     }else if(strcmp(_current->emVal.emString, "$%minf") == 0){
                         result->emType = EM_EXPRNUM;
-                        result->emVal.emNumber = em_numeric_inf();
+                        result->emVal.emNumber = em_numeric_minf();
                     }else if(strcmp(_current->emVal.emString, "$%phi") == 0){
                         result->emType = EM_EXPRNUM;
                         result->emVal.emNumber = em_numeric_phi();
@@ -528,13 +681,17 @@ struct EmValueNode* em_createexpression_helper(em_object _current, size_t _varco
 }
 
 em_expr em_createexpression(em_object _current, size_t _varcount, const char** _varlist, em_val** _vardata){
+    struct EmExpression* result = NULL;
+    size_t count = 0;
+    em_object current;
+    
     if (_current == NULL) { return NULL;}
 
-    em_expr result = (em_expr)malloc(sizeof(struct EmExpression));
+    result = (em_expr)malloc(sizeof(struct EmExpression));
 
     switch (_current->emType) {
         case EM_NUMBER: {
-        case EM_STRING:
+        __attribute__((fallthrough)); case EM_STRING:
             result->emCount = 1;
             result->emHead = NULL;
             result->emFunc = em_getfunctionptr("dummy");
@@ -548,16 +705,16 @@ em_expr em_createexpression(em_object _current, size_t _varcount, const char** _
             if(list != NULL){
                 em_object name = list->emVal.emList;
                 list = list->emNext;
-                size_t count = 0;
+                count = 0;
 
-                em_object current = list;
+                current = list;
                 while(current){
                     count++;
                     current = current->emNext;
                 }
                 if (name != NULL && name->emType == EM_STRING) {
                     result->emCount = count;
-                    result->emHead = em_clonelist(name);
+                    result->emHead = name;
                     result->emArgs = (struct EmValueNode**)malloc(count * sizeof(struct EmValueNode*));
                     if(name->emVal.emString[0] == 'm' || name->emVal.emString[0] == '%'){
                         result->emFunc = em_getfunctionptr(&name->emVal.emString[1]);
@@ -573,6 +730,7 @@ em_expr em_createexpression(em_object _current, size_t _varcount, const char** _
                 break;
             }
         }
+        break; 
         default:
         break;
     }
@@ -606,8 +764,7 @@ void em_relexpr(em_expr _tofree){
     for(size_t i = 0; i < _tofree->emCount; i++){
         em_relexprnode(_tofree->emArgs[i]);
     }
-    free(_tofree->emArgs);
-    em_rellist(_tofree->emHead);
+    free((void*)_tofree->emArgs);
 }
 
 void em_relexprnode(struct EmValueNode* _tofree){
@@ -622,9 +779,9 @@ void em_relexprnode(struct EmValueNode* _tofree){
 
 em_object em_createstring(const char* _str){
     em_object result = (em_object)malloc(sizeof(struct EmList));
+    size_t len = strlen(_str);
     result->emType = EM_STRING;
     result->emNext = NULL;
-    size_t len = strlen(_str);
     if(len > 0){
         result->emVal.emString = (char*)malloc(len + 1);
         strcpy(result->emVal.emString, _str);
@@ -642,3 +799,4 @@ em_object em_createnumber(double _number){
 
     return result;
 }
+// NOLINTEND(misc-no-recursion)

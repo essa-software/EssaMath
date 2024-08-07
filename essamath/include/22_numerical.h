@@ -33,7 +33,7 @@ int em_find_root_2(em_object _f, em_object _a, em_object _b, em_object _options)
 int em_bf_find_root(em_object _expr, em_object _x, em_object _a, em_object _b, em_object _options);
 int em_bf_find_root_2(em_object _f, em_object _a, em_object _b, em_object _options);
 int em_newton(em_object _expr, em_object _x, em_object _x0, em_object _eps);
-int em_rk(em_object _ODE, em_object _var, em_object _initial, em_object _domain);
+int em_rk(em_object _ode, em_object _var, em_object _initial, em_object _domain);
 
 #ifdef __cplusplus
 }

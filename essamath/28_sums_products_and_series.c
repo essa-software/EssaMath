@@ -2,15 +2,13 @@
 #include "expression.h"
 #include <stdarg.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 int em_bashindices(em_object _expr){
     return em_invoke("bashindices", 1, _expr);
 }
 
-int em_lsum(em_object _expr, em_object _x, em_object _L){
-    return em_invoke("lsum", 3, _expr, _x, _L);
+int em_lsum(em_object _expr, em_object _x, em_object _l){
+    return em_invoke("lsum", 3, _expr, _x, _l);
 }
 
 int em_intosum(em_object _expr){
@@ -31,28 +29,11 @@ int em_sumcontract(em_object _expr){
 
 int em_deftaylor(size_t n, ...){
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
-    memset(command, 0, size);
-    strcpy(command, "deftaylor");
-
-    size_t index = strlen(command);
-    command[index++] = '(';
- 
+    int result = 0;
+    
     va_start(ptr, n);
-    for (size_t i = 0; i < n; i++){
-        em_object obj = va_arg(ptr, em_object);
-        em_tostring(obj, command + index, size - index);
-        index = strlen(command);
-        command[index++] = ',';
-    }
-    command[index - 1] = ')';
- 
-    // Ending argument list traversal
+    result = em_invoke("deftaylor", n, ptr);
     va_end(ptr);
-
-    int result =  em_eval(command);
-    free(command);
 
     return result;
 }
@@ -86,33 +67,16 @@ int em_taylor(em_object _expr, em_object _x, em_object _a, em_object _n){
 }
 
 int em_taylor_2(em_object _expr, em_object _args){
-    return em_invoke("taylor", 1, _expr);
+    return em_invoke("taylor", 2, _expr, _args);
 }
 
 int em_taylor_3(size_t n, ...){
     va_list ptr;
-    size_t size = 256 * n;
-    char* command = (char*)malloc(size);
-    memset(command, 0, size);
-    strcpy(command, "taylor");
-
-    size_t index = strlen(command);
-    command[index++] = '(';
- 
+    int result = 0;
+    
     va_start(ptr, n);
-    for (size_t i = 0; i < n; i++){
-        em_object obj = va_arg(ptr, em_object);
-        em_tostring(obj, command + index, size - index);
-        index = strlen(command);
-        command[index++] = ',';
-    }
-    command[index - 1] = ')';
- 
-    // Ending argument list traversal
+    result = em_invoke("taylor", n, ptr);
     va_end(ptr);
-
-    int result =  em_eval(command);
-    free(command);
 
     return result;
 }
@@ -249,7 +213,7 @@ int em_poistimes(em_object _a, em_object _b){
     return em_invoke("poistimes", 2, _a, _b);
 }
 
-int em_poistrim(){
+int em_poistrim(void){
     return em_invoke("poistrim", 0);
 }
 

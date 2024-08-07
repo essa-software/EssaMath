@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-em_val dummy_double(em_object _head, struct EmValueNode** _args, size_t _count){
+em_val dummy_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
     if(_count != 1){
         return em_numeric_nan();
     }
@@ -15,7 +15,7 @@ em_val dummy_double(em_object _head, struct EmValueNode** _args, size_t _count){
     return em_calculateexprnode(_args[0]);
 }
 
-em_val add_double(em_object _head, struct EmValueNode** _args, size_t _count){
+em_val add_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
     em_val result = em_createreal(0);
 
     for(size_t i = 0; i < _count; i++){
@@ -27,7 +27,7 @@ em_val add_double(em_object _head, struct EmValueNode** _args, size_t _count){
     return result;
 }
 
-em_val sub_double(em_object _head, struct EmValueNode** _args, size_t _count){
+em_val sub_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
     if(_count != 1){
         return em_numeric_nan();
     }
@@ -40,7 +40,7 @@ em_val sub_double(em_object _head, struct EmValueNode** _args, size_t _count){
     return result;
 }
 
-em_val mul_double(em_object _head, struct EmValueNode** _args, size_t _count){
+em_val mul_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
     em_val result = em_createreal(1);
 
     for(size_t i = 0; i < _count; i++){
@@ -52,7 +52,7 @@ em_val mul_double(em_object _head, struct EmValueNode** _args, size_t _count){
     return result;
 }
 
-em_val div_double(em_object _head, struct EmValueNode** _args, size_t _count){
+em_val div_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
     if(_count != 2){
         return em_numeric_nan();
     }
@@ -65,7 +65,7 @@ em_val div_double(em_object _head, struct EmValueNode** _args, size_t _count){
     return result;
 }
 
-em_val pow_double(em_object _head, struct EmValueNode** _args, size_t _count){
+em_val pow_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
     if(_count != 2){
         return em_numeric_nan();
     }
@@ -78,7 +78,7 @@ em_val pow_double(em_object _head, struct EmValueNode** _args, size_t _count){
     return result;
 }
 
-em_val fact_double(em_object _head, struct EmValueNode** _args, size_t _count){
+em_val fact_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
     if(_count != 1){
         return em_numeric_nan();
     }
@@ -91,7 +91,7 @@ em_val fact_double(em_object _head, struct EmValueNode** _args, size_t _count){
     return result;
 }
 
-em_val mod_double(em_object _head, struct EmValueNode** _args, size_t _count){
+em_val mod_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
     if(_count != 2){
         return em_numeric_nan();
     }
@@ -104,16 +104,16 @@ em_val mod_double(em_object _head, struct EmValueNode** _args, size_t _count){
     return result;
 }
 
-#define EM_EXPR_FUNC(name)                                                          \
-em_val name##_double(em_object _head, struct EmValueNode** _args, size_t _count){   \
-    if(_count != 1){                                                                \
-        return em_numeric_nan();                                                    \
-    }                                                                               \
-    em_val result;                                                                  \
-    if(!em_numeric_##name(&result, em_calculateexprnode(_args[0]))){                \
-        return em_numeric_nan();                                                    \
-    }                                                                               \
-    return result;                                                                  \
+#define EM_EXPR_FUNC(name)                                                                          \
+em_val name##_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){    \
+    if(_count != 1){                                                                                \
+        return em_numeric_nan();                                                                    \
+    }                                                                                               \
+    em_val result;                                                                                  \
+    if(!em_numeric_##name(&result, em_calculateexprnode(_args[0]))){                                \
+        return em_numeric_nan();                                                                    \
+    }                                                                                               \
+    return result;                                                                                  \
 }
 
 EM_EXPR_FUNC(abs)
@@ -144,7 +144,7 @@ EM_EXPR_FUNC(acoth)
 EM_EXPR_FUNC(asech)
 EM_EXPR_FUNC(acsch)
 
-em_val floor_double(em_object _head, struct EmValueNode** _args, size_t _count){
+em_val floor_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
     if(_count != 1){
         return em_numeric_nan();
     }
@@ -155,7 +155,7 @@ em_val floor_double(em_object _head, struct EmValueNode** _args, size_t _count){
     return result;
 }
 
-em_val ceil_double(em_object _head, struct EmValueNode** _args, size_t _count){
+em_val ceil_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
     if(_count != 1){
         return em_numeric_nan();
     }
@@ -166,7 +166,7 @@ em_val ceil_double(em_object _head, struct EmValueNode** _args, size_t _count){
     return result;
 }
 
-em_val round_double(em_object _head, struct EmValueNode** _args, size_t _count){
+em_val round_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
     if(_count != 1){
         return em_numeric_nan();
     }
@@ -177,8 +177,7 @@ em_val round_double(em_object _head, struct EmValueNode** _args, size_t _count){
     return result;
 }
 
-
-em_val atan2_double(em_object _head, struct EmValueNode** _args, size_t _count){
+em_val atan2_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
     if(_count != 2){
         return em_numeric_nan();
     }
@@ -190,7 +189,17 @@ em_val atan2_double(em_object _head, struct EmValueNode** _args, size_t _count){
     return result;
 }
 
-em_val bfloat_double(em_object _head, struct EmValueNode** _args, size_t _count){
+em_val list_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
+    em_val result = em_createvector((em_val*)malloc(_count*sizeof(em_val)), _count);
+
+    for(size_t i = 0; i < _count; i++){
+        result.emValue.emVector.emData[i] = em_calculateexprnode(_args[i]);
+    }
+
+    return result;
+}
+
+em_val bfloat_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
     if(_count != 2){
         return em_numeric_nan();
     }
@@ -205,10 +214,10 @@ em_val bfloat_double(em_object _head, struct EmValueNode** _args, size_t _count)
         current = current->emNext;
     }
 
-    double m = em_getdouble(em_calculateexprnode(_args[0]));
-    double e = em_getdouble(em_calculateexprnode(_args[1]));
+    em_val m = em_calculateexprnode(_args[0]);
+    em_val e = em_calculateexprnode(_args[1]);
 
-    return em_createreal(m * pow(2, e-p));
+    return em_createreal(em_getdouble(&m) * pow(2, em_getdouble(&e)-p));
 }
 
 static struct EmHashmap* hashmapdouble = NULL;
@@ -217,54 +226,55 @@ void em_inithashmapdouble(void){
     hashmapdouble = (struct EmHashmap*)malloc(sizeof(struct EmHashmap));
     em_initializehashmap(hashmapdouble);
 
-    em_hashmapinsert(hashmapdouble, "dummy", (void*)&dummy_double);
-    em_hashmapinsert(hashmapdouble, "plus", (void*)&add_double);
-    em_hashmapinsert(hashmapdouble, "minus", (void*)&sub_double);
-    em_hashmapinsert(hashmapdouble, "times", (void*)&mul_double);
-    em_hashmapinsert(hashmapdouble, "rat", (void*)&div_double);
-    em_hashmapinsert(hashmapdouble, "quotient", (void*)&div_double);
-    em_hashmapinsert(hashmapdouble, "expt", (void*)&pow_double);
-    em_hashmapinsert(hashmapdouble, "factorial", (void*)&fact_double);
-    em_hashmapinsert(hashmapdouble, "mod", (void*)&mod_double);
+    em_hashmapinsert(hashmapdouble, "dummy", (void*)&dummy_expr);
+    em_hashmapinsert(hashmapdouble, "plus", (void*)&add_expr);
+    em_hashmapinsert(hashmapdouble, "minus", (void*)&sub_expr);
+    em_hashmapinsert(hashmapdouble, "times", (void*)&mul_expr);
+    em_hashmapinsert(hashmapdouble, "rat", (void*)&div_expr);
+    em_hashmapinsert(hashmapdouble, "quotient", (void*)&div_expr);
+    em_hashmapinsert(hashmapdouble, "expt", (void*)&pow_expr);
+    em_hashmapinsert(hashmapdouble, "factorial", (void*)&fact_expr);
+    em_hashmapinsert(hashmapdouble, "mod", (void*)&mod_expr);
 
-    em_hashmapinsert(hashmapdouble, "abs", (void*)&abs_double);
-    em_hashmapinsert(hashmapdouble, "exp", (void*)&exp_double);
-    em_hashmapinsert(hashmapdouble, "log", (void*)&log_double);
+    em_hashmapinsert(hashmapdouble, "abs", (void*)&abs_expr);
+    em_hashmapinsert(hashmapdouble, "exp", (void*)&exp_expr);
+    em_hashmapinsert(hashmapdouble, "log", (void*)&log_expr);
 
-    em_hashmapinsert(hashmapdouble, "floor", (void*)&floor_double);
-    em_hashmapinsert(hashmapdouble, "ceil", (void*)&ceil_double);
-    em_hashmapinsert(hashmapdouble, "round", (void*)&round_double);
+    em_hashmapinsert(hashmapdouble, "floor", (void*)&floor_expr);
+    em_hashmapinsert(hashmapdouble, "ceil", (void*)&ceil_expr);
+    em_hashmapinsert(hashmapdouble, "round", (void*)&round_expr);
 
-    em_hashmapinsert(hashmapdouble, "sin", (void*)&sin_double);
-    em_hashmapinsert(hashmapdouble, "cos", (void*)&cos_double);
-    em_hashmapinsert(hashmapdouble, "tan", (void*)&tan_double);
-    em_hashmapinsert(hashmapdouble, "cot", (void*)&cot_double);
-    em_hashmapinsert(hashmapdouble, "sec", (void*)&sec_double);
-    em_hashmapinsert(hashmapdouble, "csc", (void*)&csc_double);
+    em_hashmapinsert(hashmapdouble, "sin", (void*)&sin_expr);
+    em_hashmapinsert(hashmapdouble, "cos", (void*)&cos_expr);
+    em_hashmapinsert(hashmapdouble, "tan", (void*)&tan_expr);
+    em_hashmapinsert(hashmapdouble, "cot", (void*)&cot_expr);
+    em_hashmapinsert(hashmapdouble, "sec", (void*)&sec_expr);
+    em_hashmapinsert(hashmapdouble, "csc", (void*)&csc_expr);
 
-    em_hashmapinsert(hashmapdouble, "asin", (void*)&asin_double);
-    em_hashmapinsert(hashmapdouble, "acos", (void*)&acos_double);
-    em_hashmapinsert(hashmapdouble, "atan", (void*)&atan_double);
-    em_hashmapinsert(hashmapdouble, "atan2", (void*)&atan2_double);
-    em_hashmapinsert(hashmapdouble, "acot", (void*)&acot_double);
-    em_hashmapinsert(hashmapdouble, "asec", (void*)&asec_double);
-    em_hashmapinsert(hashmapdouble, "acsc", (void*)&acsc_double);
+    em_hashmapinsert(hashmapdouble, "asin", (void*)&asin_expr);
+    em_hashmapinsert(hashmapdouble, "acos", (void*)&acos_expr);
+    em_hashmapinsert(hashmapdouble, "atan", (void*)&atan_expr);
+    em_hashmapinsert(hashmapdouble, "atan2", (void*)&atan2_expr);
+    em_hashmapinsert(hashmapdouble, "acot", (void*)&acot_expr);
+    em_hashmapinsert(hashmapdouble, "asec", (void*)&asec_expr);
+    em_hashmapinsert(hashmapdouble, "acsc", (void*)&acsc_expr);
 
-    em_hashmapinsert(hashmapdouble, "sinh", (void*)&sinh_double);
-    em_hashmapinsert(hashmapdouble, "cosh", (void*)&cosh_double);
-    em_hashmapinsert(hashmapdouble, "tanh", (void*)&tanh_double);
-    em_hashmapinsert(hashmapdouble, "coth", (void*)&coth_double);
-    em_hashmapinsert(hashmapdouble, "sech", (void*)&sech_double);
-    em_hashmapinsert(hashmapdouble, "csch", (void*)&csch_double);
+    em_hashmapinsert(hashmapdouble, "sinh", (void*)&sinh_expr);
+    em_hashmapinsert(hashmapdouble, "cosh", (void*)&cosh_expr);
+    em_hashmapinsert(hashmapdouble, "tanh", (void*)&tanh_expr);
+    em_hashmapinsert(hashmapdouble, "coth", (void*)&coth_expr);
+    em_hashmapinsert(hashmapdouble, "sech", (void*)&sech_expr);
+    em_hashmapinsert(hashmapdouble, "csch", (void*)&csch_expr);
 
-    em_hashmapinsert(hashmapdouble, "asinh", (void*)&asinh_double);
-    em_hashmapinsert(hashmapdouble, "acosh", (void*)&acosh_double);
-    em_hashmapinsert(hashmapdouble, "atanh", (void*)&atanh_double);
-    em_hashmapinsert(hashmapdouble, "acoth", (void*)&acoth_double);
-    em_hashmapinsert(hashmapdouble, "asech", (void*)&asech_double);
-    em_hashmapinsert(hashmapdouble, "acsch", (void*)&acsch_double);
+    em_hashmapinsert(hashmapdouble, "asinh", (void*)&asinh_expr);
+    em_hashmapinsert(hashmapdouble, "acosh", (void*)&acosh_expr);
+    em_hashmapinsert(hashmapdouble, "atanh", (void*)&atanh_expr);
+    em_hashmapinsert(hashmapdouble, "acoth", (void*)&acoth_expr);
+    em_hashmapinsert(hashmapdouble, "asech", (void*)&asech_expr);
+    em_hashmapinsert(hashmapdouble, "acsch", (void*)&acsch_expr);
 
-    em_hashmapinsert(hashmapdouble, "bigfloat", (void*)&bfloat_double);
+    em_hashmapinsert(hashmapdouble, "list", (void*)&list_expr);
+    em_hashmapinsert(hashmapdouble, "bigfloat", (void*)&bfloat_expr);
 }
 
 em_val (*em_getfunctionptr(const char* _funcname))(em_object, struct EmValueNode**, size_t){

@@ -8,13 +8,13 @@
 extern "C" {
 #endif
 
-em_val em_numeric_nan();
-em_val em_numeric_inf();
-em_val em_numeric_minf();
-em_val em_numeric_i();
-em_val em_numeric_e();
-em_val em_numeric_pi();
-em_val em_numeric_phi();
+em_val em_numeric_nan(void);
+em_val em_numeric_inf(void);
+em_val em_numeric_minf(void);
+em_val em_numeric_i(void);
+em_val em_numeric_e(void);
+em_val em_numeric_pi(void);
+em_val em_numeric_phi(void);
 
 int em_numeric_equal(int* _result, em_val _a, em_val _b);
 int em_numeric_nequal(int* _result, em_val _a, em_val _b);

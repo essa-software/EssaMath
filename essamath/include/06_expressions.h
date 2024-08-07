@@ -49,7 +49,7 @@ int em_subst(em_object _a, em_object _b, em_object _c);
 int em_substinpart(em_object _x, em_object _expr, size_t n, ...);
 int em_substpart(em_object _x, em_object _expr, size_t n, ...);
 int em_symbolp(em_object _expr);
-int em_unorder();
+int em_unorder(void);
 int em_verbify(em_object _f);
 
 #ifdef __cplusplus

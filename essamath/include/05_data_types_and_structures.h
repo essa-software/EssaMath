@@ -10,13 +10,13 @@ extern "C" {
 // 5.1 Numbers
 int em_bfloat(em_object _expr);
 int em_bfloatp(em_object _expr);
-int em_bigfloat_bits();
-int em_bigfloat_eps();
+int em_bigfloat_bits(void);
+int em_bigfloat_eps(void);
 int em_decode_float(em_object _f);
 int em_evenp(em_object _expr);
 int em_float(em_object _expr);
-int em_float_bits();
-int em_float_eps();
+int em_float_bits(void);
+int em_float_eps(void);
 int em_float_precision(em_object _f);
 int em_floatnump(em_object _expr);
 int em_integerp(em_object _expr);
@@ -56,9 +56,9 @@ int em_last(em_object _expr);
 int em_lastn(em_object _expr, em_object _n);
 int em_length(em_object _expr);
 int em_listp(em_object _expr);
-int em_lreduce(em_object _F, em_object _s);
-int em_lreduce_2(em_object _F, em_object _s, em_object _s_0);
-int em_makelist();
+int em_lreduce(em_object _f, em_object _s);
+int em_lreduce_2(em_object _f, em_object _s, em_object _s_0);
+int em_makelist(void);
 int em_makelist_2(em_object _expr, em_object _n);
 int em_makelist_3(em_object _expr, em_object _i, em_object _i_max);
 int em_makelist_4(em_object _expr, em_object _i, em_object _i_0, em_object _i_max);
@@ -69,41 +69,42 @@ int em_pop(em_object _expr);
 int em_push(em_object _item, em_object _list);
 int em_rest(em_object _expr, em_object _n);
 int em_rest_2(em_object _expr);
-int em_rreduce(em_object _F, em_object _s);
-int em_rreduce_2(em_object _F, em_object _s, em_object _s_np1);
+int em_reverse(em_object _list);
+int em_rreduce(em_object _f, em_object _s);
+int em_rreduce_2(em_object _f, em_object _s, em_object _s_np1);
 int em_second(em_object _expr);
 int em_seventh(em_object _expr);
 int em_sixth(em_object _expr);
-int em_sort(em_object _L, em_object _P);
-int em_sort_2(em_object _L);
+int em_sort(em_object _l, em_object _p);
+int em_sort_2(em_object _l);
 int em_sublist(em_object _list, em_object _p);
-int em_sublist_indices(em_object _L, em_object _P);
+int em_sublist_indices(em_object _l, em_object _p);
 int em_tenth(em_object _expr);
-int em_tree_reduce(em_object _F, em_object _s);
-int em_tree_reduce_2(em_object _F, em_object _s, em_object _s_0);
-int em_unique(em_object _L);
-int em_xreduce(em_object _F, em_object _s);
-int em_xreduce_2(em_object _F, em_object _s, em_object _s_0);
+int em_tree_reduce(em_object _f, em_object _s);
+int em_tree_reduce_2(em_object _f, em_object _s, em_object _s_0);
+int em_unique(em_object _l);
+int em_xreduce(em_object _f, em_object _s);
+int em_xreduce_2(em_object _f, em_object _s, em_object _s_0);
 
 // 5.5 Arrays
 int em_array(em_object _names, size_t n, ...);
 int em_array_2(em_object _name, em_object _type, size_t n, ...);
-int em_arrayapply(em_object _A, em_object _i);
-int em_arrayinfo(em_object _A);
-int em_arraymake(em_object _A, em_object _i);
-int em_arraysetapply(em_object _A, em_object _i, em_object _x);
-int em_fillarray(em_object _A, em_object _B);
-int em_listarray(em_object _A);
+int em_arrayapply(em_object _a, em_object _i);
+int em_arrayinfo(em_object _a);
+int em_arraymake(em_object _a, em_object _i);
+int em_arraysetapply(em_object _a, em_object _i, em_object _x);
+int em_fillarray(em_object _a, em_object _b);
+int em_listarray(em_object _a);
 int em_make_array(em_object _type, size_t n, ...);
-int em_rearray(em_object _A, size_t n, ...);
+int em_rearray(em_object _a, size_t n, ...);
 int em_remarray(size_t n, ...);
-int em_remarray_2();
+int em_remarrayall(void);
 int em_subvar(em_object _x, em_object _i);
 int em_subvarp(em_object _expr);
 
 // 5.6 Structures
-int em_defstruct(em_object _S);
-int em_new(em_object _S);
+int em_defstruct(em_object _s);
+int em_new(em_object _s);
 
 #ifdef __cplusplus
 }

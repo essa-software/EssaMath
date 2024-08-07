@@ -1,9 +1,5 @@
 #include "15_special_functions.h"
 #include "expression.h"
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 int em_bessel_j(em_object _v, em_object _z){
     return em_invoke("bessel_j", 2, _v, _z);
