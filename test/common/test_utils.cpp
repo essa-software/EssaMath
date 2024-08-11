@@ -15,13 +15,13 @@ void traverse_expr(std::vector<TestOptions> const& _arr, size_t _index, std::vec
 
     // Recursive case: create the current loop
     _vars[_index] = _arr[_index]._value;
-    for (size_t i = 0; i < _arr[_index]._count; i++, em_numeric_add(&_vars[_index], _vars[_index], _arr[_index]._step)) {
+    for (size_t i = 0; i < _arr[_index]._count; i++, em_numeric_add(&_vars[_index], &_vars[_index], &_arr[_index]._step)) {
         traverse_expr(_arr, _index + 1, _vars, _foo);
     }
 }
 // NOLINTEND(misc-no-recursion)
 
-bool test_loop(std::string const& _exprstring, [[maybe_unused]] std::function<em_val(std::vector<em_val> const&)> const& _exprtest, [[maybe_unused]] std::vector<TestOptions> const& _options, [[maybe_unused]] bool _verbose){
+bool test_loop(std::string const& _exprstring, std::function<em_val(std::vector<em_val> const&)> const& _exprtest, std::vector<TestOptions> const& _options, bool _verbose){
     if(em_eval(_exprstring.c_str()) == EM_RTNORM){
         auto expr = em_getexpr(em_getlastoutput());
         if(_verbose){
@@ -61,7 +61,7 @@ bool test_loop(std::string const& _exprstring, [[maybe_unused]] std::function<em
             }
 
             int res = 0;
-            em_numeric_equal(&res, lhs, rhs);
+            em_numeric_equal(&res, &lhs, &rhs);
             
             if(res){
                 printf("SUCCESS!\n");

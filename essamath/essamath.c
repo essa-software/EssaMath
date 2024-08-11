@@ -14,12 +14,13 @@ void init_lib_MAXIMA(cl_object);
 
 // NOLINTBEGIN(readability-non-const-parameter)
 
-[[maybe_unused]] static int em_printf_list_handler(
+static int em_printf_list_handler(
 	FILE *stream, /*  stream output */
-	[[maybe_unused]] const struct printf_info *info, /* information about the various options */
+	const struct printf_info *info, /* information about the various options */
          const void *const *args /* arguments */
 	)
 	{
+    (void)info;
 
 	int ret=0;
 	const em_object obj=*((const em_object const*)(args[0]));
@@ -33,23 +34,26 @@ void init_lib_MAXIMA(cl_object);
 	return ret;
 }
 
-[[maybe_unused]] static int em_printf_list_arginfo(
-	[[maybe_unused]] const struct printf_info *info,
+static int em_printf_list_arginfo(
+	const struct printf_info *info,
 	size_t n,
 	int *argtypes,
-	[[maybe_unused]] int *size)
+	int *size)
 	{
+    (void)info;
+    (void)size;
 
 	 if (n > 0) { argtypes[0] = PA_POINTER;}
 	return 1;
 	}
 
-[[maybe_unused]] static int em_printf_expr_handler(
+static int em_printf_expr_handler(
 	FILE *stream, /*  stream output */
-	[[maybe_unused]] const struct printf_info *info, /* information about the various options */
+	const struct printf_info *info, /* information about the various options */
          const void *const *args /* arguments */
 	)
 	{
+    (void)info;
 
 	int ret=0;
 	const em_object obj=*((const em_object const*)(args[0]));
@@ -63,23 +67,26 @@ void init_lib_MAXIMA(cl_object);
 	return ret;
 }
 
-[[maybe_unused]] static int em_printf_expr_arginfo(
-	[[maybe_unused]] const struct printf_info *info,
+static int em_printf_expr_arginfo(
+	const struct printf_info *info,
 	size_t n,
 	int *argtypes,
-	[[maybe_unused]] int *size)
+	int *size)
 	{
+    (void)info;
+    (void)size;
 
 	 if (n > 0) { argtypes[0] = PA_POINTER;}
 	return 1;
 	}
 
-[[maybe_unused]] static int em_printf_val_handler(
+static int em_printf_val_handler(
 	FILE *stream, /*  stream output */
-	[[maybe_unused]] const struct printf_info *info, /* information about the various options */
+	const struct printf_info *info, /* information about the various options */
          const void *const *args /* arguments */
 	)
 	{
+    (void)info;
 
 	int ret=0;
 	const em_val* obj=*((const em_val**)(args[0]));
@@ -93,12 +100,14 @@ void init_lib_MAXIMA(cl_object);
 	return ret;
 }
 
-[[maybe_unused]] static int em_printf_val_arginfo(
-	[[maybe_unused]] const struct printf_info *info,
+static int em_printf_val_arginfo(
+	const struct printf_info *info,
 	size_t n,
 	int *argtypes,
-	[[maybe_unused]] int *size)
+	int *size)
 	{
+    (void)info;
+    (void)size;
 
 	 if (n > 0) { argtypes[0] = PA_POINTER;}
 	return 1;
@@ -131,7 +140,6 @@ void em_initmath(void){
     cl_boot(argc, argv);
     
     ecl_init_module(NULL, init_lib_MAXIMA);
-
 
     cl_eval(c_string_to_object("(initialize-runtime-globals)"));
     cl_eval(c_string_to_object("(setf *debugger-hook* nil)"));
@@ -179,42 +187,19 @@ void em_freemath(void){
     cl_shutdown();
 }
 
-static em_object em_getlast(const char* _varname){
-    em_object object = em_getvar("labels");
-    char* result = (char*)malloc(64);
-    memset(result, 0, 64);
-
-    object = object->emVal.emList->emNext;
-    while(object){
-        if(object->emType == EM_STRING && strncmp(_varname, object->emVal.emString, strlen(_varname)) == 0){
-            strcpy(result, object->emVal.emString + 1);
-            break;
-        }
-        object = object->emNext;
-    }
-    em_rellist(object);
-
-    if(result == NULL){
-        return NULL;
-    }
-
-    object = (em_object)malloc(sizeof(struct EmList));
-    object->emVal.emString = result;
-    object->emType = EM_STRING;
-    object->emNext = NULL;
-
-    return object;
-}
-
+extern em_object em_parse(cl_object _list);
 em_object em_getlastoutput(void){
-    return em_getlast("$%o");
+	cl_object obj = cl_eval(c_string_to_object("(api-eval \"second(labels)$\")"));
+
+    return em_parse(obj);
 }
 
 em_object em_getlastintermediate(void){
-    return em_getlast("$%t");
+	cl_object obj = cl_eval(c_string_to_object("(api-eval \"third(labels)$\")"));
+
+    return em_parse(obj);
 }
 
-extern em_object em_parse(cl_object _list);
 
 em_object em_getvar(const char* _varname){
     size_t size = strlen(_varname);

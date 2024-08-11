@@ -34,26 +34,26 @@ em_val em_numeric_phi(void){
    return em_createreal((1.0+sqrt(5))/2.0);
 }
 
-int em_numeric_equal(int* _result, em_val _a, em_val _b){
+int em_numeric_equal(int* _result, const em_val* _a, const em_val* _b){
    size_t size = 0;
 
-   switch(_a.emType){
+   switch(_a->emType){
       case EM_VALREAL:{
-      switch(_b.emType){
+      switch(_b->emType){
          case EM_VALREAL:{
-            if((isnan(_a.emValue.emReal) && isnan(_b.emValue.emReal)) || (isinf(_a.emValue.emReal) && isinf(_b.emValue.emReal))) {
+            if((isnan(_a->emValue.emReal) && isnan(_b->emValue.emReal)) || (isinf(_a->emValue.emReal) && isinf(_b->emValue.emReal))) {
                *_result = 1;
             } else {
-               *_result = (em_nearequal(_a.emValue.emReal, _b.emValue.emReal, EM_EPS));
+               *_result = (em_nearequal(_a->emValue.emReal, _b->emValue.emReal, EM_EPS));
             }
             return 1;
          }
          case EM_VALCOMPLEX:{
-            if(cimag(_b.emValue.emComplex) == 0) {
-               if((isnan(_a.emValue.emReal) && isnan(creal(_b.emValue.emComplex))) || (isinf(_a.emValue.emReal) && isinf(creal(_b.emValue.emReal)))) {
+            if(cimag(_b->emValue.emComplex) == 0) {
+               if((isnan(_a->emValue.emReal) && isnan(creal(_b->emValue.emComplex))) || (isinf(_a->emValue.emReal) && isinf(creal(_b->emValue.emReal)))) {
                   *_result = 1;
                } else {
-                  *_result = (em_nearequal(_a.emValue.emReal, creal(_b.emValue.emComplex), EM_EPS));
+                  *_result = (em_nearequal(_a->emValue.emReal, creal(_b->emValue.emComplex), EM_EPS));
                }
             } else {
                *_result = 0;
@@ -68,13 +68,13 @@ int em_numeric_equal(int* _result, em_val _a, em_val _b){
          }
       }
       case EM_VALCOMPLEX:{
-      switch(_b.emType){
+      switch(_b->emType){
          case EM_VALREAL:{
-            if(cimag(_a.emValue.emComplex) == 0) {
-               if((isnan(creal(_a.emValue.emComplex)) && isnan(_b.emValue.emReal)) || (isinf(creal(_a.emValue.emComplex)) && isinf(_b.emValue.emReal))) {
+            if(cimag(_a->emValue.emComplex) == 0) {
+               if((isnan(creal(_a->emValue.emComplex)) && isnan(_b->emValue.emReal)) || (isinf(creal(_a->emValue.emComplex)) && isinf(_b->emValue.emReal))) {
                   *_result = 1;
                } else {
-                  *_result = (em_nearequal(creal(_a.emValue.emComplex), _b.emValue.emReal, EM_EPS));
+                  *_result = (em_nearequal(creal(_a->emValue.emComplex), _b->emValue.emReal, EM_EPS));
                }
             } else {
                *_result = 0;
@@ -82,10 +82,10 @@ int em_numeric_equal(int* _result, em_val _a, em_val _b){
             return 1;
          }
          case EM_VALCOMPLEX:{   
-            if((isnan(creal(_a.emValue.emComplex)) && isnan(creal(_b.emValue.emComplex))) || (isinf(creal(_a.emValue.emComplex)) && isinf(creal(_b.emValue.emComplex)))) {
+            if((isnan(creal(_a->emValue.emComplex)) && isnan(creal(_b->emValue.emComplex))) || (isinf(creal(_a->emValue.emComplex)) && isinf(creal(_b->emValue.emComplex)))) {
                *_result = 1;
             }else{
-               *_result = (em_nearequal(creal(_a.emValue.emComplex), creal(_b.emValue.emComplex), EM_EPS)) && (em_nearequal(cimag(_a.emValue.emComplex), cimag(_b.emValue.emComplex), EM_EPS));
+               *_result = (em_nearequal(creal(_a->emValue.emComplex), creal(_b->emValue.emComplex), EM_EPS)) && (em_nearequal(cimag(_a->emValue.emComplex), cimag(_b->emValue.emComplex), EM_EPS));
             }
             return 1;
          }
@@ -97,21 +97,22 @@ int em_numeric_equal(int* _result, em_val _a, em_val _b){
          }
       }
       case EM_VALVECTOR:{
-      switch(_b.emType){
+      switch(_b->emType){
          case EM_VALREAL:
          case EM_VALCOMPLEX:{
             *_result = 0;
             return 1;
          }
          case EM_VALVECTOR:{
-            if(_a.emValue.emVector.emSize != _b.emValue.emVector.emSize){
+            if(_a->emValue.emVector.emSize != _b->emValue.emVector.emSize){
                return 0;
             }
 
-            size = _b.emValue.emVector.emSize;
+            *_result = 1;
+            size = _b->emValue.emVector.emSize;
             for(size_t i = 0; i < size; i++){
                int res = 0;
-               int valid = em_numeric_equal(&res, _a.emValue.emVector.emData[i], _b.emValue.emVector.emData[i]);
+               int valid = em_numeric_equal(&res, _a->emValue.emVector.emData + i, _b->emValue.emVector.emData + i);
                if(!valid){
                   return 0;
                }
@@ -128,7 +129,7 @@ int em_numeric_equal(int* _result, em_val _a, em_val _b){
    }
 }
 
-int em_numeric_nequal(int* _result, em_val _a, em_val _b){
+int em_numeric_nequal(int* _result, const em_val* _a, const em_val* _b){
    int valid = em_numeric_equal(_result, _a, _b);
 
    if(valid){
@@ -138,19 +139,19 @@ int em_numeric_nequal(int* _result, em_val _a, em_val _b){
    return valid;
 }
 
-int em_numeric_gth(int* _result, em_val _a, em_val _b){
-   switch(_a.emType){
+int em_numeric_gth(int* _result, const em_val* _a, const em_val* _b){
+   switch(_a->emType){
       case EM_VALREAL:{
-      switch(_b.emType){
+      switch(_b->emType){
          case EM_VALREAL:{
-            *_result = (_a.emValue.emReal > _b.emValue.emReal);
+            *_result = (_a->emValue.emReal > _b->emValue.emReal);
             return 1;
          }
          case EM_VALCOMPLEX:{
-            if(cimag(_b.emValue.emComplex) != 0){
+            if(cimag(_b->emValue.emComplex) != 0){
                return 0;
             }
-            *_result = (_a.emValue.emReal > creal(_b.emValue.emComplex));
+            *_result = (_a->emValue.emReal > creal(_b->emValue.emComplex));
             return 1;
          }
          case EM_VALVECTOR:{
@@ -161,19 +162,19 @@ int em_numeric_gth(int* _result, em_val _a, em_val _b){
          }
       }
       case EM_VALCOMPLEX:{
-      switch(_b.emType){
+      switch(_b->emType){
          case EM_VALREAL:{
-            if(cimag(_a.emValue.emComplex) != 0){
+            if(cimag(_a->emValue.emComplex) != 0){
                return 0;
             }
-            *_result = (creal(_a.emValue.emComplex) > _b.emValue.emReal);
+            *_result = (creal(_a->emValue.emComplex) > _b->emValue.emReal);
             return 1;
          }
          case EM_VALCOMPLEX:{
-            if(cimag(_a.emValue.emComplex) != 0 || cimag(_b.emValue.emComplex) != 0){
+            if(cimag(_a->emValue.emComplex) != 0 || cimag(_b->emValue.emComplex) != 0){
                return 0;
             }
-            *_result = (creal(_a.emValue.emComplex) > creal(_b.emValue.emComplex));
+            *_result = (creal(_a->emValue.emComplex) > creal(_b->emValue.emComplex));
             return 1;
          }
          case EM_VALVECTOR:{
@@ -191,7 +192,7 @@ int em_numeric_gth(int* _result, em_val _a, em_val _b){
    }
 }
 
-int em_numeric_geq(int* _result, em_val _a, em_val _b){
+int em_numeric_geq(int* _result, const em_val* _a, const em_val* _b){
    int g, eq;
    int valid = 1;
    valid &= em_numeric_gth(&g, _a, _b);
@@ -201,19 +202,19 @@ int em_numeric_geq(int* _result, em_val _a, em_val _b){
    return valid;
 }
 
-int em_numeric_lth(int* _result, em_val _a, em_val _b){
-   switch(_a.emType){
+int em_numeric_lth(int* _result, const em_val* _a, const em_val* _b){
+   switch(_a->emType){
       case EM_VALREAL:{
-      switch(_b.emType){
+      switch(_b->emType){
          case EM_VALREAL:{
-            *_result = (_a.emValue.emReal < _b.emValue.emReal);
+            *_result = (_a->emValue.emReal < _b->emValue.emReal);
             return 1;
          }
          case EM_VALCOMPLEX:{
-            if(cimag(_b.emValue.emComplex) != 0){
+            if(cimag(_b->emValue.emComplex) != 0){
                return 0;
             }
-            *_result = (_a.emValue.emReal < creal(_b.emValue.emComplex));
+            *_result = (_a->emValue.emReal < creal(_b->emValue.emComplex));
             return 1;
          }
          case EM_VALVECTOR:{
@@ -224,19 +225,19 @@ int em_numeric_lth(int* _result, em_val _a, em_val _b){
          }
       }
       case EM_VALCOMPLEX:{
-      switch(_b.emType){
+      switch(_b->emType){
          case EM_VALREAL:{
-            if(cimag(_a.emValue.emComplex) != 0){
+            if(cimag(_a->emValue.emComplex) != 0){
                return 0;
             }
-            *_result = (creal(_a.emValue.emComplex) < _b.emValue.emReal);
+            *_result = (creal(_a->emValue.emComplex) < _b->emValue.emReal);
             return 1;
          }
          case EM_VALCOMPLEX:{
-            if(cimag(_a.emValue.emComplex) != 0 || cimag(_b.emValue.emComplex) != 0){
+            if(cimag(_a->emValue.emComplex) != 0 || cimag(_b->emValue.emComplex) != 0){
                return 0;
             }
-            *_result = (creal(_a.emValue.emComplex) < creal(_b.emValue.emComplex));
+            *_result = (creal(_a->emValue.emComplex) < creal(_b->emValue.emComplex));
             return 1;
          }
          case EM_VALVECTOR:{
@@ -254,7 +255,7 @@ int em_numeric_lth(int* _result, em_val _a, em_val _b){
    }
 }
 
-int em_numeric_leq(int* _result, em_val _a, em_val _b){
+int em_numeric_leq(int* _result, const em_val* _a, const em_val* _b){
    int l, eq;
    int valid = 1;
    valid &= em_numeric_lth(&l, _a, _b);
@@ -265,19 +266,19 @@ int em_numeric_leq(int* _result, em_val _a, em_val _b){
 }
 
 
-int em_numeric_add(em_val* _result, em_val _a, em_val _b){
+int em_numeric_add(em_val* _result, const em_val* _a, const em_val* _b){
    size_t size = 0;
    em_val* vector = NULL;
 
-   switch(_a.emType){
+   switch(_a->emType){
       case EM_VALREAL:{
-      switch(_b.emType){
+      switch(_b->emType){
          case EM_VALREAL:{
-            *_result = em_createreal(_a.emValue.emReal + _b.emValue.emReal);
+            *_result = em_createreal(_a->emValue.emReal + _b->emValue.emReal);
             return 1;
          }
          case EM_VALCOMPLEX:{
-            *_result = em_createcomplex(_a.emValue.emReal + _b.emValue.emComplex);
+            *_result = em_createcomplex(_a->emValue.emReal + _b->emValue.emComplex);
             return 1;
          }
          case EM_VALVECTOR:{
@@ -288,13 +289,13 @@ int em_numeric_add(em_val* _result, em_val _a, em_val _b){
          }
       }
       case EM_VALCOMPLEX:{
-      switch(_b.emType){
+      switch(_b->emType){
          case EM_VALREAL:{
-            *_result = em_createcomplex(_a.emValue.emComplex + _b.emValue.emReal);
+            *_result = em_createcomplex(_a->emValue.emComplex + _b->emValue.emReal);
             return 1;
          }
          case EM_VALCOMPLEX:{
-            *_result = em_createcomplex(_a.emValue.emComplex + _b.emValue.emComplex);
+            *_result = em_createcomplex(_a->emValue.emComplex + _b->emValue.emComplex);
             return 1;
          }
          case EM_VALVECTOR:{
@@ -305,13 +306,13 @@ int em_numeric_add(em_val* _result, em_val _a, em_val _b){
          }
       }
       case EM_VALVECTOR:{
-      switch(_b.emType){
+      switch(_b->emType){
          case EM_VALREAL:
          case EM_VALCOMPLEX:{
-            size = _a.emValue.emVector.emSize;
+            size = _a->emValue.emVector.emSize;
             vector = (em_val*)malloc(size*sizeof(em_val));
             for(size_t i = 0; i < size; i++){
-               int valid = em_numeric_add(vector + i, _a.emValue.emVector.emData[i], _b);
+               int valid = em_numeric_add(vector + i, _a->emValue.emVector.emData + i, _b);
                if(!valid){
                   free(vector);
                   return 0;
@@ -321,14 +322,14 @@ int em_numeric_add(em_val* _result, em_val _a, em_val _b){
             return 1;
          }
          case EM_VALVECTOR:{
-            if(_a.emValue.emVector.emSize != _b.emValue.emVector.emSize){
+            if(_a->emValue.emVector.emSize != _b->emValue.emVector.emSize){
                return 0;
             }
 
-            size = _b.emValue.emVector.emSize;
+            size = _b->emValue.emVector.emSize;
             vector = (em_val*)malloc(size*sizeof(em_val));
             for(size_t i = 0; i < size; i++){
-               int valid = em_numeric_add(vector + i, _a.emValue.emVector.emData[i], _b.emValue.emVector.emData[i]);
+               int valid = em_numeric_add(vector + i, _a->emValue.emVector.emData + i, _b->emValue.emVector.emData + i);
                if(!valid){
                   free(vector);
                   return 0;
@@ -346,26 +347,26 @@ int em_numeric_add(em_val* _result, em_val _a, em_val _b){
    }
 }
 
-int em_numeric_sub(em_val* _result, em_val _a, em_val _b){
+int em_numeric_sub(em_val* _result, const em_val* _a, const em_val* _b){
    size_t size = 0;
    em_val* vector = NULL;
 
-   switch(_a.emType){
+   switch(_a->emType){
       case EM_VALREAL:{
-      switch(_b.emType){
+      switch(_b->emType){
          case EM_VALREAL:{
-            *_result = em_createreal(_a.emValue.emReal - _b.emValue.emReal);
+            *_result = em_createreal(_a->emValue.emReal - _b->emValue.emReal);
             return 1;
          }
          case EM_VALCOMPLEX:{
-            *_result = em_createcomplex(_a.emValue.emReal - _b.emValue.emComplex);
+            *_result = em_createcomplex(_a->emValue.emReal - _b->emValue.emComplex);
             return 1;
          }
          case EM_VALVECTOR:{
-            size = _b.emValue.emVector.emSize;
+            size = _b->emValue.emVector.emSize;
             vector = (em_val*)malloc(size*sizeof(em_val));
             for(size_t i = 0; i < size; i++){
-               int valid = em_numeric_sub(vector + i, _a, _b.emValue.emVector.emData[i]);
+               int valid = em_numeric_sub(vector + i, _a, _b->emValue.emVector.emData + i);
                if(!valid){
                   free(vector);
                   return 0;
@@ -379,20 +380,20 @@ int em_numeric_sub(em_val* _result, em_val _a, em_val _b){
          }
       }
       case EM_VALCOMPLEX:{
-      switch(_b.emType){
+      switch(_b->emType){
          case EM_VALREAL:{
-            *_result = em_createcomplex(_a.emValue.emComplex - _b.emValue.emReal);
+            *_result = em_createcomplex(_a->emValue.emComplex - _b->emValue.emReal);
             return 1;
          }
          case EM_VALCOMPLEX:{
-            *_result = em_createcomplex(_a.emValue.emComplex - _b.emValue.emComplex);
+            *_result = em_createcomplex(_a->emValue.emComplex - _b->emValue.emComplex);
             return 1;
          }
          case EM_VALVECTOR:{
-            size = _b.emValue.emVector.emSize;
+            size = _b->emValue.emVector.emSize;
             vector = (em_val*)malloc(size*sizeof(em_val));
             for(size_t i = 0; i < size; i++){
-               int valid = em_numeric_sub(vector + i, _a, _b.emValue.emVector.emData[i]);
+               int valid = em_numeric_sub(vector + i, _a, _b->emValue.emVector.emData + i);
                if(!valid){
                   free(vector);
                   return 0;
@@ -406,13 +407,13 @@ int em_numeric_sub(em_val* _result, em_val _a, em_val _b){
          }
       }
       case EM_VALVECTOR:{
-      switch(_b.emType){
+      switch(_b->emType){
          case EM_VALREAL:
          case EM_VALCOMPLEX:{
-            size = _a.emValue.emVector.emSize;
+            size = _a->emValue.emVector.emSize;
             vector = (em_val*)malloc(size*sizeof(em_val));
             for(size_t i = 0; i < size; i++){
-               int valid = em_numeric_sub(vector + i, _a.emValue.emVector.emData[i], _b);
+               int valid = em_numeric_sub(vector + i, _a->emValue.emVector.emData + i, _b);
                if(!valid){
                   free(vector);
                   return 0;
@@ -422,14 +423,14 @@ int em_numeric_sub(em_val* _result, em_val _a, em_val _b){
             return 1;
          }
          case EM_VALVECTOR:{
-            if(_a.emValue.emVector.emSize != _b.emValue.emVector.emSize){
+            if(_a->emValue.emVector.emSize != _b->emValue.emVector.emSize){
                return 0;
             }
 
-            size = _b.emValue.emVector.emSize;
+            size = _b->emValue.emVector.emSize;
             vector = (em_val*)malloc(size*sizeof(em_val));
             for(size_t i = 0; i < size; i++){
-               int valid = em_numeric_sub(vector + i, _a.emValue.emVector.emData[i], _b.emValue.emVector.emData[i]);
+               int valid = em_numeric_sub(vector + i, _a->emValue.emVector.emData + i, _b->emValue.emVector.emData + i);
                if(!valid){
                   free(vector);
                   return 0;
@@ -447,19 +448,19 @@ int em_numeric_sub(em_val* _result, em_val _a, em_val _b){
    }
 }
 
-int em_numeric_mul(em_val* _result, em_val _a, em_val _b){
+int em_numeric_mul(em_val* _result, const em_val* _a, const em_val* _b){
    size_t size = 0;
    em_val* vector = NULL;
 
-   switch(_a.emType){
+   switch(_a->emType){
       case EM_VALREAL:{
-      switch(_b.emType){
+      switch(_b->emType){
          case EM_VALREAL:{
-            *_result = em_createreal(_a.emValue.emReal * _b.emValue.emReal);
+            *_result = em_createreal(_a->emValue.emReal * _b->emValue.emReal);
             return 1;
          }
          case EM_VALCOMPLEX:{
-            *_result = em_createcomplex(_a.emValue.emReal * _b.emValue.emComplex);
+            *_result = em_createcomplex(_a->emValue.emReal * _b->emValue.emComplex);
             return 1;
          }
          case EM_VALVECTOR:{
@@ -470,13 +471,13 @@ int em_numeric_mul(em_val* _result, em_val _a, em_val _b){
          }
       }
       case EM_VALCOMPLEX:{
-      switch(_b.emType){
+      switch(_b->emType){
          case EM_VALREAL:{
-            *_result = em_createcomplex(_a.emValue.emComplex * _b.emValue.emReal);
+            *_result = em_createcomplex(_a->emValue.emComplex * _b->emValue.emReal);
             return 1;
          }
          case EM_VALCOMPLEX:{
-            *_result = em_createcomplex(_a.emValue.emComplex * _b.emValue.emComplex);
+            *_result = em_createcomplex(_a->emValue.emComplex * _b->emValue.emComplex);
             return 1;
          }
          case EM_VALVECTOR:{
@@ -487,13 +488,13 @@ int em_numeric_mul(em_val* _result, em_val _a, em_val _b){
          }
       }
       case EM_VALVECTOR:{
-      switch(_b.emType){
+      switch(_b->emType){
          case EM_VALREAL:
          case EM_VALCOMPLEX:{
-            size = _a.emValue.emVector.emSize;
+            size = _a->emValue.emVector.emSize;
             vector = (em_val*)malloc(size*sizeof(em_val));
             for(size_t i = 0; i < size; i++){
-               int valid = em_numeric_mul(vector + i, _a.emValue.emVector.emData[i], _b);
+               int valid = em_numeric_mul(vector + i, _a->emValue.emVector.emData + i, _b);
                if(!valid){
                   free(vector);
                   return 0;
@@ -503,14 +504,14 @@ int em_numeric_mul(em_val* _result, em_val _a, em_val _b){
             return 1;
          }
          case EM_VALVECTOR:{
-            if(_a.emValue.emVector.emSize != _b.emValue.emVector.emSize){
+            if(_a->emValue.emVector.emSize != _b->emValue.emVector.emSize){
                return 0;
             }
 
-            size = _b.emValue.emVector.emSize;
+            size = _b->emValue.emVector.emSize;
             vector = (em_val*)malloc(size*sizeof(em_val));
             for(size_t i = 0; i < size; i++){
-               int valid = em_numeric_mul(vector + i, _a.emValue.emVector.emData[i], _b.emValue.emVector.emData[i]);
+               int valid = em_numeric_mul(vector + i, _a->emValue.emVector.emData + i, _b->emValue.emVector.emData + i);
                if(!valid){
                   free(vector);
                   return 0;
@@ -528,7 +529,7 @@ int em_numeric_mul(em_val* _result, em_val _a, em_val _b){
    }
 }
 
-int em_numeric_div(em_val* _result, em_val _a, em_val _b){
+int em_numeric_div(em_val* _result, const em_val* _a, const em_val* _b){
    size_t size = 0;
    em_val* vector = NULL;
 
@@ -539,22 +540,22 @@ int em_numeric_div(em_val* _result, em_val _a, em_val _b){
    //    }
    // }
 
-   switch(_a.emType){
+   switch(_a->emType){
       case EM_VALREAL:{
-      switch(_b.emType){
+      switch(_b->emType){
          case EM_VALREAL:{
-            *_result = em_createreal(_a.emValue.emReal / _b.emValue.emReal);
+            *_result = em_createreal(_a->emValue.emReal / _b->emValue.emReal);
             return 1;
          }
          case EM_VALCOMPLEX:{
-            *_result = em_createcomplex(_a.emValue.emReal / _b.emValue.emComplex);
+            *_result = em_createcomplex(_a->emValue.emReal / _b->emValue.emComplex);
             return 1;
          }
          case EM_VALVECTOR:{
-            size = _b.emValue.emVector.emSize;
+            size = _b->emValue.emVector.emSize;
             vector = (em_val*)malloc(size*sizeof(em_val));
             for(size_t i = 0; i < size; i++){
-               int valid = em_numeric_div(vector + i, _a, _b.emValue.emVector.emData[i]);
+               int valid = em_numeric_div(vector + i, _a, _b->emValue.emVector.emData + i);
                if(!valid){
                   free(vector);
                   return 0;
@@ -568,20 +569,20 @@ int em_numeric_div(em_val* _result, em_val _a, em_val _b){
          }
       }
       case EM_VALCOMPLEX:{
-      switch(_b.emType){
+      switch(_b->emType){
          case EM_VALREAL:{
-            *_result = em_createcomplex(_a.emValue.emComplex / _b.emValue.emReal);
+            *_result = em_createcomplex(_a->emValue.emComplex / _b->emValue.emReal);
             return 1;
          }
          case EM_VALCOMPLEX:{
-            *_result = em_createcomplex(_a.emValue.emComplex / _b.emValue.emComplex);
+            *_result = em_createcomplex(_a->emValue.emComplex / _b->emValue.emComplex);
             return 1;
          }
          case EM_VALVECTOR:{
-            size = _b.emValue.emVector.emSize;
+            size = _b->emValue.emVector.emSize;
             vector = (em_val*)malloc(size*sizeof(em_val));
             for(size_t i = 0; i < size; i++){
-               int valid = em_numeric_div(vector + i, _a, _b.emValue.emVector.emData[i]);
+               int valid = em_numeric_div(vector + i, _a, _b->emValue.emVector.emData + i);
                if(!valid){
                   free(vector);
                   return 0;
@@ -595,13 +596,13 @@ int em_numeric_div(em_val* _result, em_val _a, em_val _b){
          }
       }
       case EM_VALVECTOR:{
-      switch(_b.emType){
+      switch(_b->emType){
          case EM_VALREAL:
          case EM_VALCOMPLEX:{
-            size = _a.emValue.emVector.emSize;
+            size = _a->emValue.emVector.emSize;
             vector = (em_val*)malloc(size*sizeof(em_val));
             for(size_t i = 0; i < size; i++){
-               int valid = em_numeric_div(vector + i, _a.emValue.emVector.emData[i], _b);
+               int valid = em_numeric_div(vector + i, _a->emValue.emVector.emData + i, _b);
                if(!valid){
                   free(vector);
                   return 0;
@@ -611,14 +612,14 @@ int em_numeric_div(em_val* _result, em_val _a, em_val _b){
             return 1;
          }
          case EM_VALVECTOR:{
-            if(_a.emValue.emVector.emSize != _b.emValue.emVector.emSize){
+            if(_a->emValue.emVector.emSize != _b->emValue.emVector.emSize){
                return 0;
             }
 
-            size = _b.emValue.emVector.emSize;
+            size = _b->emValue.emVector.emSize;
             vector = (em_val*)malloc(size*sizeof(em_val));
             for(size_t i = 0; i < size; i++){
-               int valid = em_numeric_div(vector + i, _a.emValue.emVector.emData[i], _b.emValue.emVector.emData[i]);
+               int valid = em_numeric_div(vector + i, _a->emValue.emVector.emData + i, _b->emValue.emVector.emData + i);
                if(!valid){
                   free(vector);
                   return 0;
@@ -636,17 +637,19 @@ int em_numeric_div(em_val* _result, em_val _a, em_val _b){
    }
 }
 
-int em_numeric_pow(em_val* _result, em_val _a, em_val _b){
+int em_numeric_pow(em_val* _result, const em_val* _a, const em_val* _b){
    size_t size = 0;
    em_val* vector = NULL;
 
    em_val isdivisiblebytwo;
-   if(em_numeric_mod(&isdivisiblebytwo, _b, em_createreal(2))){
+   em_val _0 = em_createreal(0);
+   em_val _2 = em_createreal(2);
+   if(em_numeric_mod(&isdivisiblebytwo, _b, &_2)){
       int equal;
-      if(em_numeric_equal(&equal, isdivisiblebytwo, em_createreal(0))){
+      if(em_numeric_equal(&equal, &isdivisiblebytwo, &_0)){
          if(equal){
             int islessthanzero = 1;
-            if(em_numeric_lth(&islessthanzero, _a, em_createreal(0))){
+            if(em_numeric_lth(&islessthanzero, _a, &_0)){
                if(islessthanzero){
                   return 0;
                }
@@ -655,22 +658,22 @@ int em_numeric_pow(em_val* _result, em_val _a, em_val _b){
       }
    }
 
-   switch(_a.emType){
+   switch(_a->emType){
       case EM_VALREAL:{
-      switch(_b.emType){
+      switch(_b->emType){
          case EM_VALREAL:{
-            *_result = em_createreal(pow(_a.emValue.emReal, _b.emValue.emReal));
+            *_result = em_createreal(pow(_a->emValue.emReal, _b->emValue.emReal));
             return 1;
          }
          case EM_VALCOMPLEX:{
-            *_result = em_createcomplex(cpow(_a.emValue.emReal, _b.emValue.emComplex));
+            *_result = em_createcomplex(cpow(_a->emValue.emReal, _b->emValue.emComplex));
             return 1;
          }
          case EM_VALVECTOR:{
-            size = _b.emValue.emVector.emSize;
+            size = _b->emValue.emVector.emSize;
             vector = (em_val*)malloc(size*sizeof(em_val));
             for(size_t i = 0; i < size; i++){
-               int valid = em_numeric_pow(vector + i, _a, _b.emValue.emVector.emData[i]);
+               int valid = em_numeric_pow(vector + i, _a, _b->emValue.emVector.emData + i);
                if(!valid){
                   free(vector);
                   return 0;
@@ -684,20 +687,20 @@ int em_numeric_pow(em_val* _result, em_val _a, em_val _b){
          }
       }
       case EM_VALCOMPLEX:{
-      switch(_b.emType){
+      switch(_b->emType){
          case EM_VALREAL:{
-            *_result = em_createcomplex(cpow(_a.emValue.emComplex, _b.emValue.emReal));
+            *_result = em_createcomplex(cpow(_a->emValue.emComplex, _b->emValue.emReal));
             return 1;
          }
          case EM_VALCOMPLEX:{
-            *_result = em_createcomplex(cpow(_a.emValue.emComplex, _b.emValue.emComplex));
+            *_result = em_createcomplex(cpow(_a->emValue.emComplex, _b->emValue.emComplex));
             return 1;
          }
          case EM_VALVECTOR:{
-            size = _b.emValue.emVector.emSize;
+            size = _b->emValue.emVector.emSize;
             vector = (em_val*)malloc(size*sizeof(em_val));
             for(size_t i = 0; i < size; i++){
-               int valid = em_numeric_pow(vector + i, _a, _b.emValue.emVector.emData[i]);
+               int valid = em_numeric_pow(vector + i, _a, _b->emValue.emVector.emData + i);
                if(!valid){
                   free(vector);
                   return 0;
@@ -711,13 +714,13 @@ int em_numeric_pow(em_val* _result, em_val _a, em_val _b){
          }
       }
       case EM_VALVECTOR:{
-      switch(_b.emType){
+      switch(_b->emType){
          case EM_VALREAL:
          case EM_VALCOMPLEX:{
-            size = _a.emValue.emVector.emSize;
+            size = _a->emValue.emVector.emSize;
             vector = (em_val*)malloc(size*sizeof(em_val));
             for(size_t i = 0; i < size; i++){
-               int valid = em_numeric_pow(vector + i, _a.emValue.emVector.emData[i], _b);
+               int valid = em_numeric_pow(vector + i, _a->emValue.emVector.emData + i, _b);
                if(!valid){
                   free(vector);
                   return 0;
@@ -727,14 +730,14 @@ int em_numeric_pow(em_val* _result, em_val _a, em_val _b){
             return 1;
          }
          case EM_VALVECTOR:{
-            if(_a.emValue.emVector.emSize != _b.emValue.emVector.emSize){
+            if(_a->emValue.emVector.emSize != _b->emValue.emVector.emSize){
                return 0;
             }
 
-            size = _b.emValue.emVector.emSize;
+            size = _b->emValue.emVector.emSize;
             vector = (em_val*)malloc(size*sizeof(em_val));
             for(size_t i = 0; i < size; i++){
-               int valid = em_numeric_pow(vector + i, _a.emValue.emVector.emData[i], _b.emValue.emVector.emData[i]);
+               int valid = em_numeric_pow(vector + i, _a->emValue.emVector.emData + i, _b->emValue.emVector.emData + i);
                if(!valid){
                   free(vector);
                   return 0;
@@ -752,34 +755,35 @@ int em_numeric_pow(em_val* _result, em_val _a, em_val _b){
    }
 }
 
-int em_numeric_neg(em_val* _result, em_val _a){
-   return em_numeric_sub(_result, em_createreal(0), _a);
+int em_numeric_neg(em_val* _result, const em_val* _a){
+   em_val _0 = em_createreal(0);
+   return em_numeric_sub(_result, &_0, _a);
 }
 
-int em_numeric_mod(em_val* _result, em_val _a, em_val _b){
+int em_numeric_mod(em_val* _result, const em_val* _a, const em_val* _b){
    double a = 0, b = 0;
 
    if(!em_numeric_isinteger(_a)){
       return 0;
    }
 
-   switch(_a.emType){
+   switch(_a->emType){
       case EM_VALREAL:
-         a = _a.emValue.emReal;
+         a = _a->emValue.emReal;
       break;
       case EM_VALCOMPLEX:
-         a = creal(_a.emValue.emComplex);
+         a = creal(_a->emValue.emComplex);
       break;
       default:
          return 0;
    }
 
-   switch(_b.emType){
+   switch(_b->emType){
       case EM_VALREAL:
-         b = _b.emValue.emReal;
+         b = _b->emValue.emReal;
       break;
       case EM_VALCOMPLEX:
-         b = creal(_b.emValue.emComplex);
+         b = creal(_b->emValue.emComplex);
       break;
       default:
          return 0;
@@ -789,7 +793,7 @@ int em_numeric_mod(em_val* _result, em_val _a, em_val _b){
    return 1;
 }
 
-int em_numeric_factorial(em_val* _result, em_val _a){
+int em_numeric_factorial(em_val* _result, const em_val* _a){
    double res = 0;
    int result = 1;
 
@@ -797,12 +801,12 @@ int em_numeric_factorial(em_val* _result, em_val _a){
       return 0;
    }
 
-   switch(_a.emType){
+   switch(_a->emType){
       case EM_VALREAL:
-         res = _a.emValue.emReal;
+         res = _a->emValue.emReal;
       break;
       case EM_VALCOMPLEX:
-         res = creal(_a.emValue.emReal);
+         res = creal(_a->emValue.emReal);
       break;
       default:
          return 0;
@@ -913,19 +917,19 @@ static _Complex double cacsch(_Complex double _x){
 }
 
 #define EM_NUMERIC_FUNC(name)                                                             \
-int em_numeric_##name(em_val* _result, em_val _a){                                        \
-   switch(_a.emType){                                                                     \
+int em_numeric_##name(em_val* _result, const em_val* _a){                                        \
+   switch(_a->emType){                                                                     \
       case EM_VALREAL:                                                                    \
-         *_result = em_createreal(name(_a.emValue.emReal));                               \
+         *_result = em_createreal(name(_a->emValue.emReal));                               \
          return 1;                                                                        \
       case EM_VALCOMPLEX:                                                                 \
-         *_result = em_createcomplex(c##name(_a.emValue.emComplex));                      \
+         *_result = em_createcomplex(c##name(_a->emValue.emComplex));                      \
          return 1;                                                                        \
       case EM_VALVECTOR:{                                                                 \
-            size_t size = _a.emValue.emVector.emSize;                                     \
+            size_t size = _a->emValue.emVector.emSize;                                     \
             em_val* vector = (em_val*)malloc(size*sizeof(em_val));                                       \
             for(size_t i = 0; i < size; i++){                                             \
-               int valid = em_numeric_##name(vector + i, _a.emValue.emVector.emData[i]);  \
+               int valid = em_numeric_##name(vector + i, _a->emValue.emVector.emData + i);  \
                if(!valid){                                                                \
                   free(vector);                                                           \
                   return 0;                                                               \
@@ -967,28 +971,28 @@ EM_NUMERIC_FUNC(acoth)
 EM_NUMERIC_FUNC(asech)
 EM_NUMERIC_FUNC(acsch)
 
-int em_numeric_atan2(em_val* _result, em_val _a, em_val _b){
+int em_numeric_atan2(em_val* _result, const em_val* _a, const em_val* _b){
    em_val x;
    if(em_numeric_div(&x, _b, _a)){
-      return em_numeric_atan(_result, x);
+      return em_numeric_atan(_result, &x);
    }
 
    return 0;
 }
 
-int em_numeric_abs(em_val* _result, em_val _a){
-   switch(_a.emType){
+int em_numeric_abs(em_val* _result, const em_val* _a){
+   switch(_a->emType){
       case EM_VALREAL:
-         *_result = em_createreal(fabs(_a.emValue.emReal));
+         *_result = em_createreal(fabs(_a->emValue.emReal));
          return 1;
       case EM_VALCOMPLEX:
-         *_result = em_createcomplex(cabs(_a.emValue.emComplex));
+         *_result = em_createcomplex(cabs(_a->emValue.emComplex));
          return 1;
       case EM_VALVECTOR:{
-            size_t size = _a.emValue.emVector.emSize;
+            size_t size = _a->emValue.emVector.emSize;
             em_val* vector = (em_val*)malloc(size*sizeof(em_val));
             for(size_t i = 0; i < size; i++){
-               int valid = em_numeric_abs(vector + i, _a.emValue.emVector.emData[i]);
+               int valid = em_numeric_abs(vector + i, _a->emValue.emVector.emData + i);
                if(!valid){
                   free(vector);
                   return 0;
@@ -1003,22 +1007,22 @@ int em_numeric_abs(em_val* _result, em_val _a){
 
 }
 
-int em_numeric_floor(em_val* _result, em_val _a){
-   switch(_a.emType){
+int em_numeric_floor(em_val* _result, const em_val* _a){
+   switch(_a->emType){
       case EM_VALREAL:
-         *_result = em_createreal(floor(_a.emValue.emReal));
+         *_result = em_createreal(floor(_a->emValue.emReal));
          return 1;
       case EM_VALCOMPLEX:
-         if(cimag(_a.emValue.emComplex) != 0.0){
+         if(cimag(_a->emValue.emComplex) != 0.0){
             return 0;
          }
-         *_result = em_createcomplex(floor(creal(_a.emValue.emComplex)));
+         *_result = em_createcomplex(floor(creal(_a->emValue.emComplex)));
          return 1;
       case EM_VALVECTOR:{
-            size_t size = _a.emValue.emVector.emSize;
+            size_t size = _a->emValue.emVector.emSize;
             em_val* vector = (em_val*)malloc(size*sizeof(em_val));
             for(size_t i = 0; i < size; i++){
-               int valid = em_numeric_floor(vector + i, _a.emValue.emVector.emData[i]);
+               int valid = em_numeric_floor(vector + i, _a->emValue.emVector.emData + i);
                if(!valid){
                   free(vector);
                   return 0;
@@ -1033,22 +1037,22 @@ int em_numeric_floor(em_val* _result, em_val _a){
 
 }
 
-int em_numeric_ceil(em_val* _result, em_val _a){
-   switch(_a.emType){
+int em_numeric_ceil(em_val* _result, const em_val* _a){
+   switch(_a->emType){
       case EM_VALREAL:
-         *_result = em_createreal(ceil(_a.emValue.emReal));
+         *_result = em_createreal(ceil(_a->emValue.emReal));
          return 1;
       case EM_VALCOMPLEX:
-         if(cimag(_a.emValue.emComplex) != 0.0){
+         if(cimag(_a->emValue.emComplex) != 0.0){
             return 0;
          }
-         *_result = em_createcomplex(ceil(creal(_a.emValue.emComplex)));
+         *_result = em_createcomplex(ceil(creal(_a->emValue.emComplex)));
          return 1;
       case EM_VALVECTOR:{
-            size_t size = _a.emValue.emVector.emSize;
+            size_t size = _a->emValue.emVector.emSize;
             em_val* vector = (em_val*)malloc(size*sizeof(em_val));
             for(size_t i = 0; i < size; i++){
-               int valid = em_numeric_ceil(vector + i, _a.emValue.emVector.emData[i]);
+               int valid = em_numeric_ceil(vector + i, _a->emValue.emVector.emData + i);
                if(!valid){
                   free(vector);
                   return 0;
@@ -1062,22 +1066,22 @@ int em_numeric_ceil(em_val* _result, em_val _a){
    }
 }
 
-int em_numeric_round(em_val* _result, em_val _a){
-   switch(_a.emType){
+int em_numeric_round(em_val* _result, const em_val* _a){
+   switch(_a->emType){
       case EM_VALREAL:
-         *_result = em_createreal(round(_a.emValue.emReal));
+         *_result = em_createreal(round(_a->emValue.emReal));
          return 1;
       case EM_VALCOMPLEX:
-         if(cimag(_a.emValue.emComplex) != 0.0){
+         if(cimag(_a->emValue.emComplex) != 0.0){
             return 0;
          }
-         *_result = em_createcomplex(round(creal(_a.emValue.emComplex)));
+         *_result = em_createcomplex(round(creal(_a->emValue.emComplex)));
          return 1;
       case EM_VALVECTOR:{
-            size_t size = _a.emValue.emVector.emSize;
+            size_t size = _a->emValue.emVector.emSize;
             em_val* vector = (em_val*)malloc(size*sizeof(em_val));
             for(size_t i = 0; i < size; i++){
-               int valid = em_numeric_round(vector + i, _a.emValue.emVector.emData[i]);
+               int valid = em_numeric_round(vector + i, _a->emValue.emVector.emData + i);
                if(!valid){
                   free(vector);
                   return 0;
@@ -1091,18 +1095,18 @@ int em_numeric_round(em_val* _result, em_val _a){
    }
 }
 
-int em_numeric_isinteger(em_val _value){
+int em_numeric_isinteger(const em_val* _value){
    double a = 0.0, b = 0.0;
    
-   switch(_value.emType){
+   switch(_value->emType){
       case EM_VALREAL:
-         b = _value.emValue.emReal;
+         b = _value->emValue.emReal;
          break;
       case EM_VALCOMPLEX:{
-         if(cimag(_value.emValue.emComplex) != 0.0){
+         if(cimag(_value->emValue.emComplex) != 0.0){
             return 0;
          }
-         b = creal(_value.emValue.emComplex);
+         b = creal(_value->emValue.emComplex);
          break;
       }
       default:

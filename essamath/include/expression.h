@@ -104,10 +104,9 @@ struct EmValueNode{
 };
 
 struct EmExpression{
-    em_object emHead;
     struct EmValueNode** emArgs;
     size_t emCount;
-    em_val (*emFunc)(em_object, struct EmValueNode**, size_t);
+    em_val (*emFunc)(struct EmValueNode**, size_t);
 };
 
 #define em_expr struct EmExpression*

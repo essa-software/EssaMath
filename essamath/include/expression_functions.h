@@ -11,7 +11,7 @@ extern "C" {
 #define EM_FUNCDEF(name) (em_val (*(name))(em_object, struct EmValueNode**, size_t))
 
 void em_inithashmapdouble(void);
-em_val (*em_getfunctionptr(const char* _funcname))(em_object, struct EmValueNode**, size_t);
+em_val (*em_getfunctionptr(const char* _funcname))(struct EmValueNode**, size_t);
 void em_freehashmapdouble(void);
 
 #ifdef __cplusplus

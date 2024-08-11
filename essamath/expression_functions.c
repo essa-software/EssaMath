@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-em_val dummy_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
+em_val dummy_expr(struct EmValueNode** _args, size_t _count){
     if(_count != 1){
         return em_numeric_nan();
     }
@@ -15,11 +15,12 @@ em_val dummy_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, 
     return em_calculateexprnode(_args[0]);
 }
 
-em_val add_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
+em_val add_expr(struct EmValueNode** _args, size_t _count){
     em_val result = em_createreal(0);
 
     for(size_t i = 0; i < _count; i++){
-        if(!em_numeric_add(&result, result, em_calculateexprnode(_args[i]))){
+        em_val other = em_calculateexprnode(_args[i]);
+        if(!em_numeric_add(&result, &result, &other)){
             return em_numeric_nan();
         }
     }
@@ -27,24 +28,26 @@ em_val add_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, si
     return result;
 }
 
-em_val sub_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
+em_val sub_expr(struct EmValueNode** _args, size_t _count){
     if(_count != 1){
         return em_numeric_nan();
     }
 
-    em_val result;
-    if(!em_numeric_neg(&result, em_calculateexprnode(_args[0]))){
+    em_val result = em_createreal(0);
+    em_val other = em_calculateexprnode(_args[0]);
+    if(!em_numeric_neg(&result, &other)){
         return em_numeric_nan();
     }
 
     return result;
 }
 
-em_val mul_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
+em_val mul_expr(struct EmValueNode** _args, size_t _count){
     em_val result = em_createreal(1);
 
     for(size_t i = 0; i < _count; i++){
-        if(!em_numeric_mul(&result, result, em_calculateexprnode(_args[i]))){
+        em_val other = em_calculateexprnode(_args[i]);
+        if(!em_numeric_mul(&result, &result, &other)){
             return em_numeric_nan();
         }
     }
@@ -52,52 +55,59 @@ em_val mul_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, si
     return result;
 }
 
-em_val div_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
+em_val div_expr(struct EmValueNode** _args, size_t _count){
     if(_count != 2){
         return em_numeric_nan();
     }
 
-    em_val result;
-    if(!em_numeric_div(&result, em_calculateexprnode(_args[0]), em_calculateexprnode(_args[1]))){
+    em_val result = em_createreal(0);
+    em_val lhs = em_calculateexprnode(_args[0]);
+    em_val rhs = em_calculateexprnode(_args[1]);
+    if(!em_numeric_div(&result, &lhs, &rhs)){
         return em_numeric_nan();
     }
 
     return result;
 }
 
-em_val pow_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
+em_val pow_expr(struct EmValueNode** _args, size_t _count){
     if(_count != 2){
         return em_numeric_nan();
     }
 
-    em_val result;
-    if(!em_numeric_pow(&result, em_calculateexprnode(_args[0]), em_calculateexprnode(_args[1]))){
+    em_val result = em_createreal(0);
+    em_val lhs = em_calculateexprnode(_args[0]);
+    em_val rhs = em_calculateexprnode(_args[1]);
+    if(!em_numeric_pow(&result, &lhs, &rhs)){
         return em_numeric_nan();
     }
 
     return result;
 }
 
-em_val fact_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
+em_val fact_expr(struct EmValueNode** _args, size_t _count){
     if(_count != 1){
         return em_numeric_nan();
     }
 
-    em_val result;
-    if(!em_numeric_factorial(&result, em_calculateexprnode(_args[0]))){
+    em_val result = em_createreal(0);
+    em_val other = em_calculateexprnode(_args[0]);
+    if(!em_numeric_factorial(&result, &other)){
         return em_numeric_nan();
     }
 
     return result;
 }
 
-em_val mod_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
+em_val mod_expr(struct EmValueNode** _args, size_t _count){
     if(_count != 2){
         return em_numeric_nan();
     }
 
-    em_val result;
-    if(!em_numeric_mod(&result, em_calculateexprnode(_args[0]), em_calculateexprnode(_args[1]))){
+    em_val result = em_createreal(0);
+    em_val lhs = em_calculateexprnode(_args[0]);
+    em_val rhs = em_calculateexprnode(_args[1]);
+    if(!em_numeric_mod(&result, &lhs, &rhs)){
         return em_numeric_nan();
     }
 
@@ -105,12 +115,13 @@ em_val mod_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, si
 }
 
 #define EM_EXPR_FUNC(name)                                                                          \
-em_val name##_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){    \
+em_val name##_expr(struct EmValueNode** _args, size_t _count){                                      \
     if(_count != 1){                                                                                \
         return em_numeric_nan();                                                                    \
     }                                                                                               \
-    em_val result;                                                                                  \
-    if(!em_numeric_##name(&result, em_calculateexprnode(_args[0]))){                                \
+    em_val result = em_createreal(0);                                                               \
+    em_val other = em_calculateexprnode(_args[0]);                                                  \
+    if(!em_numeric_##name(&result, &other)){                                                        \
         return em_numeric_nan();                                                                    \
     }                                                                                               \
     return result;                                                                                  \
@@ -143,53 +154,25 @@ EM_EXPR_FUNC(atanh)
 EM_EXPR_FUNC(acoth)
 EM_EXPR_FUNC(asech)
 EM_EXPR_FUNC(acsch)
+EM_EXPR_FUNC(floor)
+EM_EXPR_FUNC(ceil)
+EM_EXPR_FUNC(round)
 
-em_val floor_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
-    if(_count != 1){
-        return em_numeric_nan();
-    }
-    em_val result;
-    if(!em_numeric_floor(&result, em_calculateexprnode(_args[0]))){
-        return em_numeric_nan();
-    }
-    return result;
-}
-
-em_val ceil_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
-    if(_count != 1){
-        return em_numeric_nan();
-    }
-    em_val result;
-    if(!em_numeric_ceil(&result, em_calculateexprnode(_args[0]))){
-        return em_numeric_nan();
-    }
-    return result;
-}
-
-em_val round_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
-    if(_count != 1){
-        return em_numeric_nan();
-    }
-    em_val result;
-    if(!em_numeric_round(&result, em_calculateexprnode(_args[0]))){
-        return em_numeric_nan();
-    }
-    return result;
-}
-
-em_val atan2_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
+em_val atan2_expr(struct EmValueNode** _args, size_t _count){
     if(_count != 2){
         return em_numeric_nan();
     }
 
-    em_val result;
-    if(!em_numeric_atan2(&result, em_calculateexprnode(_args[0]), em_calculateexprnode(_args[1]))){
+    em_val result = em_createreal(0);
+    em_val lhs = em_calculateexprnode(_args[0]);
+    em_val rhs = em_calculateexprnode(_args[1]);
+    if(!em_numeric_atan2(&result, &lhs, &rhs)){
         return em_numeric_nan();
     }
     return result;
 }
 
-em_val list_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
+em_val list_expr(struct EmValueNode** _args, size_t _count){
     em_val result = em_createvector((em_val*)malloc(_count*sizeof(em_val)), _count);
 
     for(size_t i = 0; i < _count; i++){
@@ -199,21 +182,12 @@ em_val list_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, s
     return result;
 }
 
-em_val bfloat_expr([[maybe_unused]] em_object _head, struct EmValueNode** _args, size_t _count){
+em_val bfloat_expr(struct EmValueNode** _args, size_t _count){
     if(_count != 2){
         return em_numeric_nan();
     }
 
-    double p = 0;
-    em_object current = _head;
-    while(current){
-        if(current->emType == EM_NUMBER){
-            p = current->emVal.emNumber;
-        }
-
-        current = current->emNext;
-    }
-
+    double p = 56;
     em_val m = em_calculateexprnode(_args[0]);
     em_val e = em_calculateexprnode(_args[1]);
 
@@ -277,10 +251,10 @@ void em_inithashmapdouble(void){
     em_hashmapinsert(hashmapdouble, "bigfloat", (void*)&bfloat_expr);
 }
 
-em_val (*em_getfunctionptr(const char* _funcname))(em_object, struct EmValueNode**, size_t){
+em_val (*em_getfunctionptr(const char* _funcname))(struct EmValueNode**, size_t){
     void* result = em_hashmapsearch(hashmapdouble, _funcname);
 
-    return (em_val (*)(em_object, struct EmValueNode**, size_t))result;
+    return (em_val (*)(struct EmValueNode**, size_t))result;
 }
 
 void em_freehashmapdouble(void){

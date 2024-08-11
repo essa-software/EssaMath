@@ -112,56 +112,70 @@ TEST(EssaMathTestsArithmeticComplex, AdditionAndSubtraction2) {
     EXPECT_TRUE(result);
 }
 
-// // *********************************************************************************** //
-// //                          ADDITION AND SUBTRACTION - VECTOR                          //
-// // *********************************************************************************** //
+// *********************************************************************************** //
+//                          ADDITION AND SUBTRACTION - VECTOR                          //
+// *********************************************************************************** //
 
-// TEST(EssaMathTestsArithmeticVector, AdditionAndSubtraction1) {
-//     em_initmath();
+TEST(EssaMathTestsArithmeticVector, AdditionAndSubtraction1) {
+    em_initmath();
 
-//     bool result = true;
-//     result &= test_real(
-//         "[x,y+%pi,%e]", 
-//         [](std::vector<em_val> const& _vars) 
-//             -> double{
-//                 auto _x = em_getdouble(_vars[0]);
-//                 auto _y = em_getdouble(_vars[1]);
+    bool result = true;
+    result &= test_loop(
+        "[2.5,-%pi,%e]+x-y", 
+        [](std::vector<em_val> const& _vars) 
+            -> em_val{
+                auto _x = em_getdouble(&_vars[0]);
+                auto _y = em_getdouble(&_vars[1]);
 
-//                 return _x+_y + M_PI;
-//             }, 
-//         std::vector<TestOptionsReal>{
-//         TestOptionsReal{._varname = "x", ._lbound = -2*M_PI, ._rbound = 2*M_PI, ._step = M_PI / 8},
-//         TestOptionsReal{._varname = "y", ._lbound = -2.0, ._rbound = 5.0, ._step = 1}
-//     }, true);
+                return em_vector(3, em_real(2.5 + _x - _y), 
+                                    em_real(-M_PI + _x - _y), 
+                                    em_real(M_E + _x - _y));
+            }, 
+        std::vector<TestOptions>{
+        TestOptions{._varname = "x", ._value = em_real(-2*M_PI), ._step = em_real(M_PI / 8), ._count = 10},
+        TestOptions{._varname = "y", ._value = em_real(-2.0), ._step = em_real(1), ._count = 10}
+    }, true);
 
-//     em_freemath();
-//     // Assert
-//     EXPECT_TRUE(result);
-// }
+    em_freemath();
+    // Assert
+    EXPECT_TRUE(result);
+}
 
-// TEST(EssaMathTestsArithmeticVector, AdditionAndSubtraction2) {
-//     em_initmath();
+TEST(EssaMathTestsArithmeticVector, AdditionAndSubtraction2) {
+    em_initmath();
 
-//     bool result = true;
-//     result &= test_complex(
-//         "d+%i*e+%i-2*%pi", 
-//         [&](std::vector<em_val> const& _vars) 
-//             -> std::complex<double>{
-//                 std::complex<double> _i = std::complex<double>(0, 1);
-//                 std::complex<double> _d = em_getcomplex(_vars[0]);
-//                 std::complex<double> _e = em_getcomplex(_vars[1]);
+    bool result = true;
+    result &= test_loop(
+        "[%i+1+e,%pi-8,d-3*%i] - [-e,d,e+d] + d*%i", 
+        [&](std::vector<em_val> const& _vars) 
+            -> em_val{
+                std::complex<double> _i = std::complex<double>(0, 1);
+                std::complex<double> _d = em_getcomplex(_vars.data());
+                std::complex<double> _e = em_getcomplex(&_vars[1]);
                 
-//                 return _d+_i*_e+_i-2*M_PI;
-//             }, 
-//         std::vector<TestOptionsComplex>{
-//         TestOptionsComplex{._varname = "d", ._value = std::complex<double>(1, 2), ._step = std::complex<double>(M_PI / 8, -2 * M_E), ._count = 10},
-//         TestOptionsComplex{._varname = "e", ._value = std::complex<double>(-3, -4), ._step = std::complex<double>(1, -M_E), ._count = 10},
-//     }, true);
+                std::complex<double> _v[3]{
+                    _i+1.0+_e+_e+_d*_i,
+                        M_PI-8-_d+_d*_i,
+                        _d-3.0*_i-_e-_d+_d*_i
+                };
 
-//     em_freemath();
-//     // Assert
-//     EXPECT_TRUE(result);
-// }
+                return em_vector(3, em_complex(_v[0].real(), _v[0].imag()), 
+                                    em_complex(_v[1].real(), _v[1].imag()), 
+                                    em_complex(_v[2].real(), _v[2].imag()));
+            }, 
+        std::vector<TestOptions>{
+        TestOptions{._varname = "d", ._value = em_complex(1, 2), ._step = em_complex(M_PI / 8, -2 * M_E), ._count = 10},
+        TestOptions{._varname = "e", ._value = em_complex(-3, -4), ._step = em_complex(1, -M_E), ._count = 10},
+    }, true);
+
+    em_freemath();
+    // Assert
+    EXPECT_TRUE(result);
+}
+
+// *********************************************************************************** //
+//                         MULTIPLICATION AND DIVISION - REAL                          //
+// *********************************************************************************** //
 
 TEST(EssaMathTestsArithmeticReal, MultiplicationAndDivision1) {
     em_initmath();
@@ -211,6 +225,10 @@ TEST(EssaMathTestsArithmeticReal, MultiplicationAndDivision2) {
     // Assert
     EXPECT_TRUE(result);
 }
+
+// *********************************************************************************** //
+//                      MULTIPLICATION AND DIVISION - COMPLEX                          //
+// *********************************************************************************** //
 
 TEST(EssaMathTestsArithmeticComplex, MultiplicationAndDivision1) {
     em_initmath();
@@ -262,6 +280,10 @@ TEST(EssaMathTestsArithmeticComplex, MultiplicationAndDivision2) {
     EXPECT_TRUE(result);
 }
 
+// *********************************************************************************** //
+//                        EXPONENTIATION AND FACTORIAL - REAL                          //
+// *********************************************************************************** //
+
 TEST(EssaMathTestsArithmeticReal, ExponentationAndFactorial1) {
     em_initmath();
 
@@ -302,9 +324,9 @@ TEST(EssaMathTestsArithmeticReal, ExponentationAndFactorial2) {
 
                     em_val a, b, c;
                     int valid = 1;
-                    valid &= em_numeric_factorial(&a, _a);
-                    valid &= em_numeric_factorial(&b, _b);
-                    valid &= em_numeric_factorial(&c, _c);
+                    valid &= em_numeric_factorial(&a, &_a);
+                    valid &= em_numeric_factorial(&b, &_b);
+                    valid &= em_numeric_factorial(&c, &_c);
 
                     if(!valid){
                         return em_numeric_nan();
@@ -322,6 +344,10 @@ TEST(EssaMathTestsArithmeticReal, ExponentationAndFactorial2) {
     // Assert
     EXPECT_TRUE(result);
 }
+
+// *********************************************************************************** //
+//                     EXPONENTIATION AND FACTORIAL - COMPLEX                          //
+// *********************************************************************************** //
 
 TEST(EssaMathTestsArithmeticComplex, ExponentationAndFactorial1) {
     em_initmath();

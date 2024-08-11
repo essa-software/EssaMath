@@ -707,7 +707,8 @@ static double _Complex Li_unity_neg(int64_t n, double _Complex z)
 
     do {
          em_val fact;
-         em_numeric_factorial(&fact, em_createreal((double)k));
+         em_val _k = em_createreal((double)k);
+         em_numeric_factorial(&fact, &_k);
 
         term = em_numeric_zeta(n - k)/em_getdouble(&fact)*lnzk;
         if (!is_finite(term)) { break; }
@@ -732,7 +733,8 @@ static double _Complex Li_rest(int64_t n, double _Complex z)
     em_val fact;
 
     for (int64_t k = kmax; k != 0; --k) {
-         em_numeric_factorial(&fact, em_createreal((double)n - 2*(double)k));
+      em_val _n = em_createreal((double)n - 2*(double)k);
+         em_numeric_factorial(&fact, &_n);
 
         ifac = 1/em_getdouble(&fact);
         if (em_nearequal(ifac, 0, 1e-9)) { return 2.0*sum; }
@@ -741,7 +743,8 @@ static double _Complex Li_rest(int64_t n, double _Complex z)
         if (EM_NEAREQUAL_COMPLEX(sum, old_sum, EM_EPS)) { break; }
     }
 
-    em_numeric_factorial(&fact, em_createreal((double)n));
+      em_val _n = em_createreal((double)n);
+    em_numeric_factorial(&fact, &_n);
 
     return 2.0*sum - p/em_getdouble(&fact);
 }

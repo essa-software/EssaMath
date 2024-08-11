@@ -16,12 +16,18 @@ int em_eval(const char* _expr){
     cl_env_ptr l_env = ecl_process_env();
 
 	ECL_HANDLER_CASE_BEGIN(l_env, ecl_list1(ECL_T)) {
-        char buf[1024] = {0};
+        const char* format = "(handler-case (catch 'macsyma-quit (macsyma-top-level (make-string-input-stream \"%s$\") :batch) ) )";
+        size_t len = strlen(_expr) + strlen(format) - 1;
+        char* buf = (char*)malloc(len);
+        sprintf(buf, format, _expr);
+        buf[len - 1] = '\0';
+
         cl_eval(c_string_to_object("(setq *maxima-started* nil)"));
-        sprintf(buf, "(handler-case (catch 'macsyma-quit (macsyma-top-level (make-string-input-stream \"%s$\") :batch) ) )", _expr);
         cl_eval(c_string_to_object(buf));
+        free(buf);
 	} } else if (__the_env->values[0] == ecl_make_fixnum(1)) {
-        [[maybe_unused]] const cl_object args = __the_env->values[1]; {
+        // const cl_object args = __the_env->values[1]; 
+        {
         return EM_RTERROR;
 	} ECL_HANDLER_CASE_END;
 
@@ -29,7 +35,6 @@ int em_eval(const char* _expr){
 }
 
 int em_invoke(const char* _funcname, size_t n, ...){
-
     va_list ptr;
     size_t index = 0;
     char command[1024] = {0};
@@ -43,17 +48,15 @@ int em_invoke(const char* _funcname, size_t n, ...){
     va_start(ptr, n);
     for (size_t i = 0; i < n; i++){
         em_object obj = va_arg(ptr, em_object);
-        printf("%zx\n", (size_t)obj);
         em_printexpr(obj, command + index, 1024 - index);
         index = strlen(command);
         command[index++] = ',';
     }
+    va_end(ptr);
+
     command[index - 1] = ')';
     command[index] = '\0';
  
-    // Ending argument list traversal
-    va_end(ptr);
-
     result =  em_eval(command);
 
     return result;
@@ -159,15 +162,12 @@ static em_object em_parse_from_string(const char* _buf, size_t _begin, size_t _e
 
 em_object em_parse(cl_object _list){
     char* buf = (char*)malloc(_list->string.dim);
-    char* test = (char*)malloc(_list->string.dim);
     em_object result = NULL;
     
     size_t index = 0;
     int ommitwhitespace = 0;
     for(size_t i = 0; i < _list->string.dim; i++){
         char c = (char)tolower(_list->string.self[i]);
-        test[i] = c;
-        
         if(isgraph(c)){
             ommitwhitespace = 0;
             buf[index] = c;
@@ -178,12 +178,10 @@ em_object em_parse(cl_object _list){
             index++;
         }
     }
-    // printf("%s\n", test);
     buf[index] = 0;
     result =  em_parse_from_string(buf, 0, index);
     
     free(buf);
-    free(test);
     return result;
 }
 
@@ -693,7 +691,6 @@ em_expr em_createexpression(em_object _current, size_t _varcount, const char** _
         case EM_NUMBER: {
         __attribute__((fallthrough)); case EM_STRING:
             result->emCount = 1;
-            result->emHead = NULL;
             result->emFunc = em_getfunctionptr("dummy");
             result->emArgs = (struct EmValueNode**)malloc(sizeof(struct EmValueNode*));
             result->emArgs[0] = em_createexpression_helper(_current, _varcount, _varlist, _vardata);
@@ -714,7 +711,6 @@ em_expr em_createexpression(em_object _current, size_t _varcount, const char** _
                 }
                 if (name != NULL && name->emType == EM_STRING) {
                     result->emCount = count;
-                    result->emHead = name;
                     result->emArgs = (struct EmValueNode**)malloc(count * sizeof(struct EmValueNode*));
                     if(name->emVal.emString[0] == 'm' || name->emVal.emString[0] == '%'){
                         result->emFunc = em_getfunctionptr(&name->emVal.emString[1]);
@@ -742,7 +738,7 @@ em_val em_calculateexpr(em_expr _expr){
     if(!_expr->emFunc) {
         return em_numeric_nan();
     }
-    return (*_expr->emFunc)(_expr->emHead, _expr->emArgs, _expr->emCount); 
+    return (*_expr->emFunc)(_expr->emArgs, _expr->emCount); 
 }
 
 em_val em_calculateexprnode(struct EmValueNode* _expr){
